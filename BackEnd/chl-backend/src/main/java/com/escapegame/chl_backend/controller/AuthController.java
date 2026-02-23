@@ -1,87 +1,81 @@
 package com.escapegame.chl_backend.controller;
 
-import com.escapegame.chl_backend.dto.request.LoginRequest;
-import com.escapegame.chl_backend.dto.request.RegisterRequest;
-import com.escapegame.chl_backend.dto.response.JwtResponse;
-import com.escapegame.chl_backend.dto.response.MessageResponse;
-import com.escapegame.chl_backend.model.Role;
-import com.escapegame.chl_backend.model.User;
-import com.escapegame.chl_backend.repository.UserRepository;
-import com.escapegame.chl_backend.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = "http://localhost:5173", maxAge = 3600)
+import com.escapegame.chl_backend.dto.request.LoginRequest;
+import com.escapegame.chl_backend.dto.request.RegisterRequest;
+import com.escapegame.chl_backend.dto.response.JwtResponse;
+import com.escapegame.chl_backend.dto.response.MessageResponse;
+import com.escapegame.chl_backend.model.User;
+import com.escapegame.chl_backend.repository.UserRepository;
+import com.escapegame.chl_backend.security.JwtUtils;
+import com.escapegame.chl_backend.service.AuthService;
+
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     @Autowired
-    AuthenticationManager authenticationManager;
+    private AuthenticationManager authenticationManager;
 
     @Autowired
-    UserRepository userRepository;
+    private JwtUtils jwtUtils;
 
     @Autowired
-    PasswordEncoder encoder;
+    private AuthService authService;
 
+    // Inyectamos el repositorio para poder sacar el ID del usuario
     @Autowired
-    JwtUtils jwtUtils;
+    private UserRepository userRepository;
 
-    // LOGIN
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        
-        // 1. Autenticar usando Spring Security
+        // Autenticar al usuario
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         
-        // 2. Generar el Token JWT
+        // Generar Token JWT
         String jwt = jwtUtils.generateJwtToken(authentication);
-        
-        // 3. Buscar el usuario para devolver sus datos (rol, nombre, etc)
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("Error: Usuario no encontrado."));
 
-        // Retornamos el token y los datos básicos
+        // Obtener detalles del usuario (AQUÍ ESTABA EL ERROR, DEBE SER UserDetails)
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        // Obtener el rol
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+
+        // Buscar el usuario en la BD para sacar su ID real
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
         return ResponseEntity.ok(new JwtResponse(
-                jwt, 
-                user.getId(), 
-                user.getEmail(), 
-                user.getRole().name(),
-                user.getFirstName()
+                jwt,
+                user.getId_utilisateur(), // Ahora sí tenemos el ID correcto
+                userDetails.getUsername(),
+                role
         ));
     }
 
-    // REGISTRO
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest signUpRequest) {
-        // 1. Validar si el email ya existe
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: El email ya está en uso!"));
+        try {
+            authService.registerUser(signUpRequest);
+            return ResponseEntity.ok(new MessageResponse("¡Usuario registrado exitosamente!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
-
-        // 2. Crear nuevo usuario
-        User user = new User();
-        user.setFirstName(signUpRequest.getFirstName());
-        user.setLastName(signUpRequest.getLastName());
-        user.setEmail(signUpRequest.getEmail());
-        user.setBirthDate(signUpRequest.getBirthDate()); 
-        user.setPassword(encoder.encode(signUpRequest.getPassword())); // Encriptar password
-        user.setRole(Role.USER); // Por defecto todos son USER
-
-        userRepository.save(user);
-
-        return ResponseEntity.ok(new MessageResponse("Usuario registrado exitosamente!"));
     }
 }

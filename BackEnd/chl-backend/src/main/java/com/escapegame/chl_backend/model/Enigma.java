@@ -7,30 +7,29 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
-@Inheritance(strategy = InheritanceType.JOINED) // Estrategia para generar tablas separadas
+@Table(name = "enigmas")
 @Data
 @NoArgsConstructor
-public class User {
-    
+public class Enigma {
+
     @Id
-    
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_utilisateur;
+    private Long id_enigme;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+    private String nom;
+    
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    @Column(nullable = false)
-    private String password;
+    private String reponseAttendue; // La respuesta correcta para validar
+    
+    private String difficulte;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private SkillType competence;
 }

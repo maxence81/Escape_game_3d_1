@@ -6,9 +6,13 @@ import lombok.Data;
 
 @Data
 public class RegisterRequest {
-    private String firstName;
-    private String lastName;
     private String email;
     private String password;
-    private LocalDate birthDate; // Formato esperado JSON: "YYYY-MM-DD"
+    
+    // Nuevos campos del Mockup
+    private String prenom;
+    private String nom;
+    private String pseudo;
+    private String etablissement;
+    private LocalDate dateNaissance;
 }

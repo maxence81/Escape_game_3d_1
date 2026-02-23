@@ -13,36 +13,42 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.escapegame.chl_backend.dto.response.AdminDashboardStatsDTO;
 import com.escapegame.chl_backend.dto.response.PlayerDetailDTO;
-import com.escapegame.chl_backend.model.User;
+import com.escapegame.chl_backend.model.Player;
 import com.escapegame.chl_backend.service.AdminService;
 
-@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')") // Solo usuarios con rol ADMIN pueden acceder aquí
+@CrossOrigin(origins = "*")
 public class AdminController {
 
     @Autowired
     private AdminService adminService;
 
-    // DATOS PARA EL DASHBOARD PRINCIPAL
+    // 1. Obtener Estadísticas Globales del Dashboard
     @GetMapping("/dashboard-stats")
+    @PreAuthorize("hasRole('ADMIN')") // Solo usuarios con rol ADMIN pueden entrar
     public ResponseEntity<AdminDashboardStatsDTO> getDashboardStats() {
         AdminDashboardStatsDTO stats = adminService.getGlobalStats();
         return ResponseEntity.ok(stats);
     }
 
-    // LISTA DE JUGADORES
+    // 2. Obtener la lista de todos los jugadores (con sus datos de jugador)
     @GetMapping("/players")
-    public ResponseEntity<List<User>> getAllPlayers() {
-        List<User> players = adminService.findAllPlayers();
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Player>> getAllPlayers() {
+        List<Player> players = adminService.findAllPlayers();
         return ResponseEntity.ok(players);
     }
 
-    // DETALLE DE UN JUGADOR ESPECÍFICO (Gráfico Radar)
-    @GetMapping("/player/{id}")
+    // 3. Obtener el Radar Chart (Competencias) de un jugador específico
+    @GetMapping("/player/{id}/stats")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlayerDetailDTO> getPlayerStats(@PathVariable Long id) {
-        PlayerDetailDTO playerStats = adminService.getPlayerDetails(id);
-        return ResponseEntity.ok(playerStats);
+        try {
+            PlayerDetailDTO details = adminService.getPlayerDetails(id);
+            return ResponseEntity.ok(details);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 }
