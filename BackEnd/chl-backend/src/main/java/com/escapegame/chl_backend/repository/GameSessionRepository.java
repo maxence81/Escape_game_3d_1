@@ -9,9 +9,11 @@ import com.escapegame.chl_backend.model.GameSession;
 import com.escapegame.chl_backend.model.Player;
 
 public interface GameSessionRepository extends JpaRepository<GameSession, Long> {
-    // Busca todas las sesiones de un jugador
+    
+    // ¡AQUÍ ESTÁ EL SECRETO! Solo deben existir estos dos métodos.
+    // Si tenías un findByPlayerId... ¡Bórralo!
+    
     List<GameSession> findByPlayer(Player player);
     
-    // Busca la sesión activa de un jugador (la que aún no tiene fecha de fin)
     Optional<GameSession> findFirstByPlayerAndDateFinIsNullOrderByDateDebutDesc(Player player);
 }

@@ -29,21 +29,17 @@ public class AuthService {
             throw new RuntimeException("Erreur: L'email est déjà utilisé!");
         }
 
-        // Ahora creamos un PLAYER, no un User genérico
         Player player = new Player();
         player.setEmail(request.getEmail());
         player.setPassword(passwordEncoder.encode(request.getPassword()));
-        player.setRole(Role.USER); // O el rol por defecto que uses
-        
-        // Nuevos campos del Mockup
+        player.setRole(Role.USER); 
         player.setPrenom(request.getPrenom());
         player.setNom(request.getNom());
         player.setPseudo(request.getPseudo());
         player.setEtablissement(request.getEtablissement());
         player.setDateNaissance(request.getDateNaissance());
-        player.setDateInscription(LocalDate.now()); // Fecha de hoy
+        player.setDateInscription(LocalDate.now());
 
-        // Guardamos en el repositorio de jugadores
         playerRepository.save(player);
     }
 }
