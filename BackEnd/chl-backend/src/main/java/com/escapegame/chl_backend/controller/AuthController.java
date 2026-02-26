@@ -36,34 +36,27 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    // Inyectamos el repositorio para poder sacar el ID del usuario
     @Autowired
     private UserRepository userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        // Autenticar al usuario
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        
-        // Generar Token JWT
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        // Obtener detalles del usuario (AQUÍ ESTABA EL ERROR, DEBE SER UserDetails)
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-        // Obtener el rol
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
-        // Buscar el usuario en la BD para sacar su ID real
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+        // AQUÍ ESTABA EL ERROR OCULTO:
         return ResponseEntity.ok(new JwtResponse(
                 jwt,
-                user.getId_utilisateur(), // Ahora sí tenemos el ID correcto
+                user.getId_utilisateur(), 
                 userDetails.getUsername(),
                 role
         ));

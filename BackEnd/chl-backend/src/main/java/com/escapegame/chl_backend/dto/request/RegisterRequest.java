@@ -8,8 +8,6 @@ import lombok.Data;
 public class RegisterRequest {
     private String email;
     private String password;
-    
-    // Nuevos campos del Mockup
     private String prenom;
     private String nom;
     private String pseudo;

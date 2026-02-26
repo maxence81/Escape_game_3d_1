@@ -12,7 +12,6 @@ public class JwtResponse {
     private String email;
     private String role;
 
-    // Constructor exacto para los 4 parámetros que envía el AuthController
     public JwtResponse(String token, Long id, String email, String role) {
         this.token = token;
         this.id = id;
