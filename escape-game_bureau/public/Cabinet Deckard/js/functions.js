@@ -128,9 +128,9 @@ function msginfos(numd) {
             document.getElementById("sbrt-content").innerHTML = "<p>Suite à la radiographie des poumons et des analyses sanguines, nous pouvons affirmer que Mme Calvin souffre d'une GRIPPE (ALTERNATIVE AINS).</p>";
             // Check if chest was unlocked to show FTP access
             if (localStorage.getItem('chestUnlocked') === 'true') {
-                document.getElementById("sbr-bottom").innerHTML = "<img src='images/sftp.png' style='cursor:pointer;' onclick='openFTP()' title='Cliquez pour ouvrir le client FTP'/><p style='color:#50ef87;font-size:11px;margin-top:5px;'>✓ Accès FTP débloqué</p>";
+                document.getElementById("sbr-bottom").innerHTML = "<img src='images/sftp.png' style='cursor:pointer;' onclick='openFTP()' title='Cliquez pour ouvrir le client FTP'/><p style='color:#50ef87;font-size:11px;margin-top:5px;'>✓ Accès FTP débloqué - Utilisez <b>connect IP:Port</b></p>";
             } else {
-                document.getElementById("sbr-bottom").innerHTML = "<img src='images/sftp.png' style='opacity:0.5;'/><p style='color:#ff6b6b;font-size:11px;margin-top:5px;'>🔒 Accès FTP verrouillé</p>";
+                document.getElementById("sbr-bottom").innerHTML = "<img src='images/sftp.png' style='opacity:0.5;'/><p style='color:#ff6b6b;font-size:11px;margin-top:5px;'>🔒 Accès FTP verrouillé - Ouvrez le coffre</p>";
             }
             break;
 
