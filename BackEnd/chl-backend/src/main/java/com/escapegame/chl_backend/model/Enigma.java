@@ -22,14 +22,14 @@ public class Enigma {
     private Long id_enigme;
 
     private String nom;
-    
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String reponseAttendue; // La respuesta correcta para validar
-    
     private String difficulte;
 
     @Enumerated(EnumType.STRING)
     private SkillType competence;
+
+    // ✅ reponseAttendue supprimé — la logique est dans le frontend 3D
 }

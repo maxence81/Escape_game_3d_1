@@ -2,7 +2,7 @@ package com.escapegame.chl_backend.controller;
 
 import com.escapegame.chl_backend.dto.request.PuzzleSubmissionDTO;
 import com.escapegame.chl_backend.dto.response.GameStatusDTO;
-import com.escapegame.chl_backend.dto.response.PuzzleResponseDTO;
+import com.escapegame.chl_backend.dto.response.MessageResponse;
 import com.escapegame.chl_backend.model.GameSession;
 import com.escapegame.chl_backend.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,6 @@ public class GameController {
     @Autowired
     private GameService gameService;
 
-    // 1. Iniciar Partida
     @PostMapping("/start")
     public ResponseEntity<?> startGame(Authentication authentication) {
         try {
@@ -37,24 +36,22 @@ public class GameController {
         }
     }
 
-    // 2. Validar Respuesta a un Enigma
-    @PostMapping("/validate-puzzle")
-    public ResponseEntity<?> validatePuzzle(Authentication authentication, @RequestBody PuzzleSubmissionDTO request) {
+    /**
+     * Le frontend appelle ce endpoint uniquement quand le joueur a fini un énigme.
+     * Il envoie l'ID de l'énigme et le temps écoulé.
+     */
+    @PostMapping("/complete-enigma")
+    public ResponseEntity<?> completeEnigma(Authentication authentication,
+                                             @RequestBody PuzzleSubmissionDTO request) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            boolean isCorrect = gameService.validatePuzzle(userDetails.getUsername(), request);
-
-            PuzzleResponseDTO response = new PuzzleResponseDTO();
-            response.setSuccess(isCorrect);
-            response.setMessage(isCorrect ? "¡Respuesta Correcta! Acceso concedido." : "Respuesta incorrecta. Intenta de nuevo.");
-
-            return ResponseEntity.ok(response);
+            gameService.completeEnigma(userDetails.getUsername(), request);
+            return ResponseEntity.ok(new MessageResponse("Énigme complétée et enregistrée."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // 3. Terminar Partida y Guardar tiempo
     @PostMapping("/end")
     public ResponseEntity<?> endGame(Authentication authentication) {
         try {

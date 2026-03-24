@@ -43,7 +43,7 @@ public class PlayerService {
                 .orElseThrow(() -> new RuntimeException("Jugador no encontrado"));
                 
         // Reutilizamos el método de AdminService pasándole el ID del jugador
-        return adminService.getPlayerDetails(player.getId_utilisateur());
+        return adminService.getPlayerDetails(player.getId());
     }
 
     /**

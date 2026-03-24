@@ -20,17 +20,14 @@ public class PuzzleAttempt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_tentative;
 
-    // Relación: A qué sesión pertenece este intento
     @ManyToOne
     @JoinColumn(name = "id_session", nullable = false)
     private GameSession session;
 
-    // Relación: A qué enigma específico están intentando jugar
     @ManyToOne
     @JoinColumn(name = "id_enigme", nullable = false)
     private Enigma enigma;
 
-    private Integer tempsPasseSec;
-    private Integer scoreFinal;
-    private Boolean estReussi;
+    private Integer tempsPasseSec; // Temps envoyé par le frontend
+    private Boolean estReussi;     // Toujours true (le frontend envoie uniquement si complété)
 }

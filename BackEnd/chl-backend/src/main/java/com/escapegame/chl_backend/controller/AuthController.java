@@ -55,10 +55,10 @@ public class AuthController {
 
         // AQUÍ ESTABA EL ERROR OCULTO:
         return ResponseEntity.ok(new JwtResponse(
-                jwt,
-                user.getId_utilisateur(), 
-                userDetails.getUsername(),
-                role
+            jwt,
+            user.getId(), // <-- CAMBIO: de getId_utilisateur() a getId()
+            userDetails.getUsername(),
+            role
         ));
     }
 
