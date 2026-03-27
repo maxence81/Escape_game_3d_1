@@ -1,11 +1,11 @@
-<template>
-  <div class="hint-btn" :style="hintStyle" @click="getHint">
-    💡 Hint <span class="hint-counter">({{ remaining }})</span>
+﻿<template>
+  <div class="hint-btn" :class="{ exhausted: limitReached }" @click="getHint">
+     Indice <span class="hint-counter">({{ remaining }})</span>
   </div>
 
   <Teleport to="body">
-    <div class="hint-toast" :style="toastStyle">
-      <span style="margin-right: 8px;">🔍</span>
+    <div class="hint-toast" :class="{ visible: toastVisible }">
+      <span style="margin-right: 8px;"></span>
       <span>{{ toastMessage }}</span>
     </div>
   </Teleport>
@@ -14,81 +14,97 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-const hintLimit = 3
+const props = defineProps({
+  hints: {
+    type: Array,
+    default: () => [
+      'Cherche bien autour de toi',
+      'As-tu regardé tous les objets interactifs ?',
+      'La solution est souvent sous tes yeux'
+    ]
+  }
+})
+
 const hintCount = ref(0)
-const remaining = computed(() => hintLimit - hintCount.value)
+const hintLimit = computed(() => props.hints.length)
+const limitReached = computed(() => hintCount.value >= hintLimit.value)
+const remaining = computed(() => hintLimit.value - hintCount.value)
+
 const toastMessage = ref('')
 const toastVisible = ref(false)
-const exhausted = ref(false)
-
-const hints = [
-  'Regarde bien les plantes 🌿',
-  'Date de naissance 🎂',
-  'Maladie et allergies 💊'
-]
-
-const hintStyle = computed(() => ({
-  borderColor: exhausted.value ? '#ff6b6b' : '#50ef87',
-  color: exhausted.value ? '#ff6b6b' : '#50ef87'
-}))
-
-const toastStyle = computed(() => ({
-  opacity: toastVisible.value ? '1' : '0',
-  transform: toastVisible.value
-    ? 'translateX(-50%) translateY(0)'
-    : 'translateX(-50%) translateY(-20px)'
-}))
+let hideTimeout = null
 
 function getHint() {
-  if (hintCount.value < hintLimit) {
-    toastMessage.value = hints[hintCount.value]
+  if (hintCount.value < hintLimit.value) {
+    toastMessage.value = props.hints[hintCount.value]
     hintCount.value++
-    if (hintCount.value === hintLimit) exhausted.value = true
   } else {
     toastMessage.value = "Plus d'indices disponibles !"
   }
+  
   toastVisible.value = true
-  setTimeout(() => { toastVisible.value = false }, 4000)
+  if (hideTimeout) clearTimeout(hideTimeout)
+  hideTimeout = setTimeout(() => { toastVisible.value = false }, 4000)
 }
 </script>
 
 <style scoped>
 .hint-btn {
   position: fixed;
-  top: 20px;
-  left: 100px;
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  font-family: 'Source Code Pro', monospace;
-  font-size: 24px;
+  top: 24px;
+  left: 24px;
+  background: rgba(15, 23, 42, 0.9);
+  border-left: 4px solid #50ef87;
+  color: #50ef87;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 18px;
   font-weight: bold;
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: 2px solid #50ef87;
-  z-index: 100;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  padding: 12px 20px;
+  border-radius: 4px;
+  z-index: 9999;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   transition: all 0.3s ease;
   user-select: none;
+  backdrop-filter: blur(8px);
 }
+
+.hint-btn:hover {
+  background: rgba(30, 41, 59, 1);
+}
+
+.hint-btn.exhausted {
+  border-left-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
 .hint-counter {
-  font-size: 14px;
-  color: #aaa;
+  font-size: 0.8em;
+  opacity: 0.8;
 }
+
 .hint-toast {
   position: fixed;
-  top: 80px;
+  top: 90px;
   left: 50%;
   transform: translateX(-50%) translateY(-20px);
-  background: linear-gradient(135deg, #16213e, #0f3460);
+  background: rgba(15, 23, 42, 0.95);
   color: #fff;
-  font-family: 'Source Code Pro', monospace;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
   font-size: 16px;
   padding: 15px 30px;
-  border-radius: 10px;
-  border: 2px solid #ffd700;
-  z-index: 200;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  border: 1px solid #ffd700;
+  z-index: 10000;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   pointer-events: none;
+  opacity: 0;
   transition: opacity 0.4s ease, transform 0.4s ease;
+  backdrop-filter: blur(4px);
+}
+
+.hint-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 </style>

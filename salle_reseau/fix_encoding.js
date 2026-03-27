@@ -6,8 +6,6 @@ file = file.replace(/<span class="icon-emoji">\?\?<\/span>([\s\S]*?)<span class=
 file = file.replace(/<span class="icon-emoji">\?\?<\/span>([\s\S]*?)<span class="icon-text">Rseau Local<\/span>/g, '<span class="icon-emoji"></span>$1<span class="icon-text">Réseau Local</span>');
 file = file.replace(/<span class="icon-emoji">\?\?<\/span>([\s\S]*?)<span class="icon-text">Systme<\/span>/g, '<span class="icon-emoji"></span>$1<span class="icon-text">Système</span>');
 
-// Check what the 'Clôture Enquête' looks like in the file
-// I will just use bulk replace for broken words:
 file = file.replace(/Rseau/g, 'Réseau');
 file = file.replace(/Systme/g, 'Système');
 file = file.replace(/t/g, 'été');
@@ -33,7 +31,6 @@ file = file.replace(/leve/g, 'élevée');
 file = file.replace(/Accs autoris/g, 'Accès autorisé');
 file = file.replace(/erron/g, 'erroné');
 
-// For safely fixing the second '??' for Clôture Enquête if any
 file = file.replace(/<span class="icon-emoji">\?\?<\/span>\s*<span class="icon-text">Clôture Enquête<\/span>/g, '<span class="icon-emoji"></span>\n            <span class="icon-text">Clôture Enquête</span>');
 
 fs.writeFileSync('src/App.vue', file, 'utf8');

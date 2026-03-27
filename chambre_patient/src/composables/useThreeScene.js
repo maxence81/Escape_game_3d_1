@@ -340,7 +340,7 @@ export function useThreeScene(containerRef) {
 		clampCameraToRoom()
 	}
 
-	// ── Pointer : mise à jour coords + cursor ─────────────────────
+	// Gestion du pointeur
 	function onPointerMove(e) {
 		const r = renderer.domElement.getBoundingClientRect()
 		pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1
@@ -355,13 +355,13 @@ export function useThreeScene(containerRef) {
 		}
 	}
 
-	// ── Clic ───────────────────────────────────────────────────────
+	// Gestion du clic──
 	function onClick() {
 		raycaster.setFromCamera(pointer, camera)
 		const hits = raycaster.intersectObjects(scene.children, true)
 		if (!hits.length) return
 		const obj = hits[0].object
-		console.log('[Click]', obj.name)
+
 		const { type, plaqueIndex } = resolveInteraction(obj)
 		if (type === 'computer') {
 			discoveredComputer.value = true

@@ -1,21 +1,21 @@
 <template>
   <div id="experience">
     <canvas ref="canvasRef" class="experience-canvas"></canvas>
-    <button class="night-mode-btn" @click="toggleNightMode">🌙</button>
+    <button class="night-mode-btn" @click="toggleNightMode"><svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg></button>
   </div>
 
-  <!-- UI Components -->
-  <GameTimer />
-  <HintSystem />
 
-  <!-- Computer Overlay -->
+  <GameTimer />
+  <HintSystem :hints="['Regarde bien les plantes ', 'Date de naissance ', 'Maladie et allergies ']" />
+
+
   <ComputerOverlay
     :visible="overlays.computer"
     :iframe-src="computerSrc"
     @close="closeOverlay('computer')"
   />
 
-  <!-- Dog Picture Overlay -->
+
   <ImageOverlay
     :visible="overlays.dog"
     image-src="/images/oslo.png"
@@ -24,7 +24,7 @@
     @close="closeOverlay('dog')"
   />
 
-  <!-- Draw Picture Overlay -->
+
   <ImageOverlay
     :visible="overlays.draw"
     image-src="/images/lea.png"
@@ -32,7 +32,7 @@
     @close="closeOverlay('draw')"
   />
 
-  <!-- Anniv Picture Overlay -->
+
   <ImageOverlay
     :visible="overlays.anniv"
     image-src="/images/anniv.png"
@@ -40,7 +40,7 @@
     @close="closeOverlay('anniv')"
   />
 
-  <!-- Chest Overlay -->
+
   <ImageOverlay
     :visible="overlays.chest"
     iframe-src="/combo-lock/index.html"
@@ -48,13 +48,13 @@
     @close="closeOverlay('chest')"
   />
 
-  <!-- Server Overlay -->
+
   <ServerOverlay
     :visible="overlays.server"
     @close="closeOverlay('server')"
   />
 
-  <!-- Skeleton / Completion Overlay -->
+
   <SkeletonOverlay
     :visible="overlays.skeleton"
     @close="closeOverlay('skeleton')"
@@ -110,7 +110,7 @@ function onGameCompleted() {
   // Game completed - confetti is handled inside SkeletonOverlay
 }
 
-// Escape key handler for all overlays
+
 function onEscapeKey(event) {
   if (event.code === 'Escape') {
     for (const key of Object.keys(overlays)) {
@@ -122,7 +122,7 @@ function onEscapeKey(event) {
   }
 }
 
-// Three.js scene
+
 const emitProxy = (event, data) => {
   if (event === 'object-click') onObjectClick(data)
 }
@@ -146,8 +146,8 @@ onBeforeUnmount(() => {
 
 .night-mode-btn {
   position: absolute;
-  top: 20px;
-  left: 30px;
+  bottom: 24px;
+  left: 24px;
   z-index: 10;
   padding: 10px;
   border: none;
@@ -157,3 +157,4 @@ onBeforeUnmount(() => {
   background: linear-gradient(135deg, #1a1a2e, #16213e);
 }
 </style>
+

@@ -1,4 +1,4 @@
-import { reactive, ref } from 'vue';
+import { reactive } from 'vue';
 import confetti from 'canvas-confetti';
 
 export const gameState = reactive({
@@ -10,15 +10,11 @@ export const gameState = reactive({
   choiceMessage: ''
 });
 
-export const timeSeconds = ref(0);
-let timerInterval = null;
-
-startTimer();
 
 export function startGame() {
   gameState.isStarted = true;
-  startTimer();
 }
+
 
 export function openChoice() {
   gameState.showChoiceOverlay = true;
@@ -55,47 +51,22 @@ export function makeChoice(answer) {
     gameState.gamePassed = true;
     gameState.showChoiceOverlay = false;
     gameState.choiceMessage = 'Bonne réponse. Vous avez découvert la vérité sur la mort de Mme Calvin. Affaire classée.';
-    stopTimer();
     triggerConfetti();
   } else {
     gameState.gameOver = true;
     gameState.showChoiceOverlay = false;
     gameState.choiceMessage = 'Mauvaise conclusion. Emma est une intelligence artificielle sous la direction du Dr Deckard... Vous vous êtes trompé de cible !';
-    stopTimer();
   }
 }
 
-export function startTimer() {
-  if (!timerInterval) {
-    timerInterval = setInterval(() => {
-      timeSeconds.value++;
-    }, 1000);
-  }
-}
-
-export function stopTimer() {
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
-}
-
-export function formatTime(seconds) {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return m + ':' + s;
-}
 
 export function useGameState() {
   return {
     gameState,
-    timeSeconds,
     startGame,
     openChoice,
     closeChoice,
     makeChoice,
-    startTimer,
-    stopTimer,
-    formatTime
   }
 }
+

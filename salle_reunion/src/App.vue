@@ -1,29 +1,40 @@
 <template>
   <div id="app">
-    <!-- 3D Scene and UI -->
     <div class="game-container">
       <Scene3D />
       <GameUI />
+      <GameTimer v-if="!gameState.gamePassed && !gameState.gameOver" />
+      <HintSystem :hints="['Le tableau blanc a des infos', 'Fouille les documents', 'Qui est suspect ?']" />
       
-      <!-- Ending Overlays -->
       <div v-if="gameState.gamePassed" class="overlay success">
         <h2>Félicitations</h2>
         <p>{{ gameState.choiceMessage }}</p>
-        <p class="final-time">Temps final : {{ formatTime(timeSeconds) }}</p>
+        <p class="final-time">Temps final : {{ finalTime }}</p>
       </div>
       <div v-if="gameState.gameOver" class="overlay error">
         <h2>Échec</h2>
         <p>{{ gameState.choiceMessage }}</p>
-        <p class="final-time">Temps final : {{ formatTime(timeSeconds) }}</p>
+        <p class="final-time">Temps final : {{ finalTime }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { gameState, startGame, timeSeconds, formatTime } from './composables/useGameState.js'
+import { ref, watch } from 'vue'
+import { gameState } from './composables/useGameState.js'
 import Scene3D from './components/Scene3D.vue'
 import GameUI from './components/GameUI.vue'
+import GameTimer from './components/GameTimer.vue'
+import HintSystem from './components/HintSystem.vue'
+
+const finalTime = ref('00:00')
+
+watch(() => gameState.gamePassed || gameState.gameOver, (ended) => {
+  if (ended && window.getTimerValue) {
+    finalTime.value = window.getTimerValue()
+  }
+})
 </script>
 
 <style>
@@ -86,3 +97,4 @@ import GameUI from './components/GameUI.vue'
   font-family: 'JetBrains Mono', monospace;
 }
 </style>
+

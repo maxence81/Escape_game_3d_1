@@ -3,26 +3,21 @@
     <div class="victory-card">
       <h2 class="victory-title">Salle Reseau Terminee</h2>
       <p class="victory-subtitle">Vous avez resolu toutes les enigmes.</p>
-      <p class="final-time">Temps final : {{ formattedTime }}</p>
+      <p class="final-time">Temps final : {{ finalTime }}</p>
 
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, onMounted } from 'vue'
 
-const props = defineProps({
-  timeSeconds: {
-    type: Number,
-    default: 0
+const finalTime = ref('00:00')
+
+onMounted(() => {
+  if (window.getTimerValue) {
+    finalTime.value = window.getTimerValue()
   }
-})
-
-const formattedTime = computed(() => {
-  const m = Math.floor(props.timeSeconds / 60).toString().padStart(2, '0')
-  const s = (props.timeSeconds % 60).toString().padStart(2, '0')
-  return m + ':' + s
 })
 </script>
 

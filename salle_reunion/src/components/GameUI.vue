@@ -1,6 +1,5 @@
 <template>
   <div class="game-ui">
-    <GameTimer v-if="gameState.isStarted && !gameState.gamePassed && !gameState.gameOver" />
 
     <div v-if="gameState.showChoiceOverlay" class="choice-modal">
       <div class="choice-content">
@@ -11,7 +10,7 @@
           <button class="choice-btn" @click="choose('Emma')">Emma</button>
           <button class="choice-btn" @click="choose('Les deux')">Les deux</button>
         </div>
-        <button class="close-btn" @click="closeChoice">Retourner enquêter</button>
+        <button class="close-btn" @click="closeChoice">Retourner enquÃªter</button>
       </div>
     </div>
   </div>
@@ -19,7 +18,6 @@
 
 <script setup>
 import { gameState, makeChoice, closeChoice } from '../composables/useGameState'
-import GameTimer from './GameTimer.vue'
 
 function choose(answer) {
   makeChoice(answer)
@@ -109,3 +107,4 @@ function choose(answer) {
   color: #ef4444;
 }
 </style>
+

@@ -1,35 +1,34 @@
 <template>
   <div class="game-ui-overlay">
 
-    <!-- ─── Indices découverts ─── -->
+
     <div v-if="discoveredClues.length > 0" class="clues-panel">
-      <h3>🔍 Indices</h3>
+      <h3>Indices</h3>
       <ul>
         <li v-if="discoveredClues.includes('bear')">
-          🧸 Vous avez vaincu le pingouin gardien et trouvé un papier dans la peluche.
+          Vous avez vaincu le pingouin gardien et trouvé un papier dans la peluche.
         </li>
         <li v-if="discoveredClues.includes('tables')">
-          📋 Documents découverts sur le bureau
+          Documents découverts sur le bureau
         </li>
         <li v-if="discoveredClues.includes('medicine')">
-          💊 Boîtes de médicaments inspectées
+          Boîtes de médicaments inspectées
         </li>
         <li v-if="discoveredClues.includes('computer')">
-          💻 Terminal repéré
+          Terminal repéré
         </li>
       </ul>
     </div>
 
-    <!-- ─── Hint ─── -->
     <div class="hint-bar">
-      <span>Explorez la pharmacie — cherchez les éléments utiles à l'enquête</span>
+      <span>Explorez la pharmacie</span>
     </div>
 
-    <!-- ─── Bear Doll ─── -->
+
     <div v-if="showBearInfo" class="modal-overlay" @click.self="showBearInfo = false">
       <div class="modal bear-modal">
         <button class="modal-close" @click="showBearInfo = false">✕</button>
-        <h2>🧸 Papier trouvé dans la peluche</h2>
+        <h2>Papier trouvé dans la peluche</h2>
         <div class="note-paper">
           <div class="note-code">CODE TERMINAL : 4719</div>
           <div class="note-body">
@@ -48,11 +47,11 @@
       </div>
     </div>
 
-    <!-- ─── BDD Tables (bureau) ─── -->
+
     <div v-if="showTablesModal" class="modal-overlay" @click.self="showTablesModal = false">
       <div class="modal tables-modal">
         <button class="modal-close" @click="showTablesModal = false">✕</button>
-        <h2>📋 Documents trouvés sur le bureau — Base de données médicale</h2>
+        <h2>Documents trouvés sur le bureau</h2>
 
         <div class="table-section">
           <h3>PATHOLOGIES_REF</h3>
@@ -105,25 +104,25 @@
       </div>
     </div>
 
-    <!-- ─── Medicine Box ─── -->
+
     <div v-if="showMedicineInfo" class="modal-overlay" @click.self="showMedicineInfo = false">
       <div class="modal medicine-modal">
         <button class="modal-close" @click="showMedicineInfo = false">✕</button>
-        <h2>💊 Boîte de médicament</h2>
+        <h2>Boîte de médicament</h2>
         <p class="medicine-name">{{ currentMedicineName }}</p>
         <p class="medicine-hint">L'étiquette est partiellement illisible. Consultez les documents
         de référence pour identifier le contenu exact de chaque boîte.</p>
       </div>
     </div>
 
-    <!-- ─── Computer Terminal ─── -->
+
     <div v-if="isComputerUIOpen" class="modal-overlay" @click.self="isComputerUIOpen = false">
       <div class="modal computer-modal">
         <button class="modal-close" @click="isComputerUIOpen = false">✕</button>
 
         <!-- LOCKED STATE -->
         <div v-if="!isComputerUnlocked" class="lock-screen">
-          <div class="lock-icon">🔒</div>
+          <div class="lock-icon">Verrouillé</div>
           <h2>Terminal Médical — Accès Restreint</h2>
           <p class="lock-instruction">Saisissez le code d'accès à 4 chiffres</p>
           <div class="code-entry">
@@ -146,17 +145,17 @@
             <button
               :class="['tab-btn', { active: activeTab === 'dossiers' }]"
               @click="activeTab = 'dossiers'"
-            >📁 Dossiers Patients</button>
+            >Dossiers Patients</button>
             <button
               :class="['tab-btn', { active: activeTab === 'formulaire' }]"
               @click="activeTab = 'formulaire'"
-            >🔐 Validation</button>
+            >Validation</button>
           </div>
 
           <!-- Dossiers Patients -->
           <div v-if="activeTab === 'dossiers'" class="tab-content">
             <div class="patient-file">
-              <h3>📂 Cabinet du Dr Deckard</h3>
+              <h3>Cabinet du Dr Deckard</h3>
               <div class="file-content">
                 <p><strong>Patient :</strong> M. Roy Batty</p>
                 <p><strong>Date :</strong> 15/01/2026</p>
@@ -170,7 +169,7 @@
             </div>
 
             <div class="patient-file">
-              <h3>📂 Rapport d'autopsie — Mme Susan Calvin</h3>
+              <h3>Rapport d'autopsie — Mme Susan Calvin</h3>
               <div class="file-content">
                 <p><strong>Date du décès :</strong> 22/12/2025</p>
                 <p><strong>Médecin légiste :</strong> Dr Eldon Tyrell</p>
@@ -181,7 +180,7 @@
                   (code CIM-10 : <span class="code">J15.9</span>).
                 </p>
                 <p class="highlight warning">
-                  ⚠️ Le traitement administré n'était <strong>pas le bon</strong>.
+                  Le traitement administré n'était <strong>pas le bon</strong>.
                   Si le traitement de 1ère intention avait été prescrit,
                   la patiente aurait pu être sauvée.
                 </p>
@@ -191,7 +190,7 @@
 
           <!-- Formulaire de Validation -->
           <div v-if="activeTab === 'formulaire'" class="tab-content">
-            <h3>🔐 Formulaire de validation — Accès pharmacie</h3>
+            <h3>Formulaire de validation</h3>
             <p class="form-instruction">
               Identifiez les DCI (dénominations communes internationales) manquantes
               à partir de votre enquête. Saisissez les noms exacts des molécules.
@@ -252,17 +251,17 @@
       </div>
     </div>
 
-    <!-- ─── Win Banner ─── -->
+
     <transition name="fade">
       <div v-if="gameCompleted" class="win-banner">
         <div class="win-content">
-          <h2>🎉 Enquête résolue</h2>
+          <h2>Enquête résolue</h2>
           <p>Traitements correctement identifiés — la trousse de premiers secours est déverrouillée.</p>
         </div>
       </div>
     </transition>
 
-    <!-- ─── Mini-Game ─── -->
+
     <MiniGame v-if="showMiniGame" @victory="onMiniGameWon" @close="showMiniGame = false" />
 
   </div>
@@ -270,7 +269,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useGameState } from '@/composables/useGameState.vue'
+import { useGameState } from '@/composables/useGameState.js'
 import MiniGame from './MiniGame.vue'
 
 const {
@@ -288,7 +287,7 @@ const {
   discoverClue,
 } = useGameState()
 
-// ── Mini-game victory ──────────────────────────────────────────
+
 function onMiniGameWon() {
   showMiniGame.value = false
   showBearInfo.value = true
@@ -297,7 +296,7 @@ function onMiniGameWon() {
 
 const activeTab = ref('dossiers')
 
-// ── Computer lock ──────────────────────────────────────────────
+
 const codeInput = ref('')
 const codeError = ref('')
 const TERMINAL_CODE = '4719'
@@ -312,7 +311,7 @@ function tryUnlock() {
   }
 }
 
-// ── Answer validation (text inputs, accent-insensitive) ────────
+
 const answer1 = ref('')
 const answer2 = ref('')
 const answer3 = ref('')
@@ -346,7 +345,7 @@ function submitAnswers() {
 </script>
 
 <style scoped>
-/* ── Overlay container ── */
+
 .game-ui-overlay {
   position: fixed;
   inset: 0;
@@ -356,7 +355,7 @@ function submitAnswers() {
 }
 .game-ui-overlay > * { pointer-events: auto; }
 
-/* ── Clues panel ── */
+
 .clues-panel {
   position: fixed;
   top: 20px;
@@ -374,7 +373,7 @@ function submitAnswers() {
 .clues-panel ul { list-style: none; padding: 0; margin: 0; }
 .clues-panel li { padding: 3px 0; font-size: 12px; opacity: 0.85; }
 
-/* ── Hint bar ── */
+
 .hint-bar {
   position: fixed;
   bottom: 20px;
@@ -389,7 +388,7 @@ function submitAnswers() {
   z-index: 200;
 }
 
-/* ── Modal overlay ── */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -423,7 +422,7 @@ function submitAnswers() {
 }
 .modal-close:hover { color: #fff; }
 
-/* ── Bear note ── */
+
 .bear-modal { width: min(90vw, 500px); }
 .bear-modal h2 { margin-top: 0; color: #ffd700; font-size: 18px; }
 .note-paper {
@@ -451,7 +450,7 @@ function submitAnswers() {
 .note-body p { margin: 10px 0; }
 .note-footer { margin-top: 16px; font-style: italic; font-weight: bold; }
 
-/* ── Tables modal ── */
+
 .tables-modal { width: min(92vw, 820px); }
 .tables-modal h2 { margin-top: 0; color: #ffd700; font-size: 17px; }
 .table-section { margin-bottom: 22px; }
@@ -477,13 +476,13 @@ tbody td {
 }
 tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
 
-/* ── Medicine modal ── */
+
 .medicine-modal { width: min(90vw, 400px); text-align: center; }
 .medicine-modal h2 { margin-top: 0; color: #ffd700; }
 .medicine-name { font-size: 18px; font-weight: 600; color: #64ffda; margin: 14px 0; }
 .medicine-hint { color: #999; font-size: 13px; }
 
-/* ── Computer modal ── */
+
 .computer-modal { width: min(92vw, 700px); }
 
 /* Lock screen */
@@ -600,7 +599,7 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
 .btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,115,232,0.35); }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ── Win banner ── */
+
 .win-banner {
   position: fixed;
   top: 0; left: 0; right: 0;

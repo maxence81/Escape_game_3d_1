@@ -152,7 +152,7 @@
 import { reactive, ref } from 'vue'
 import { useGameState } from '@/composables/useGameState.js'
 
-const { showComputer, boxUnlocked, computerCompleted, timeSeconds, stopTimer, formatTime } = useGameState()
+const { showComputer, boxUnlocked, computerCompleted } = useGameState()
 
 const CORRECT_ALLERGIE = 'medicamenteuse'
 const CORRECT_NIVEAU   = 35
@@ -215,8 +215,7 @@ function validate() {
 
   if (ok) {
     computerCompleted.value = true
-    finalTime.value = formatTime(timeSeconds.value)
-    stopTimer()
+    finalTime.value = window.getTimerValue ? window.getTimerValue() : ''
     step.value = 'result'
     startConfetti()
   } else {

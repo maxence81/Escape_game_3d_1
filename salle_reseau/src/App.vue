@@ -8,7 +8,8 @@
       @onSafeClick="handleSafeClick"
     />
 
-    <GameTimer v-if="!gamePassed" :timeSeconds="timeSeconds" />
+    <HintSystem :hints="['Rallume le routeur', 'Fouille les fichiers texte', 'Assemble les indices pour le code']" />
+    <GameTimer v-if="!gamePassed" />
 
     <NotificationOverlay :notification="notification" />
 
@@ -45,7 +46,6 @@
 
     <VictoryScreen
       v-if="gamePassed"
-      :timeSeconds="timeSeconds"
     />
   </div>
 </template>
@@ -53,6 +53,7 @@
 <script setup>
 import Scene3D from './components/Scene3D.vue'
 import GameTimer from './components/GameTimer.vue'
+import HintSystem from './components/HintSystem.vue'
 import NotificationOverlay from './components/NotificationOverlay.vue'
 import OsDesktop from './components/OsDesktop.vue'
 import SafePadlock from './components/SafePadlock.vue'
@@ -74,7 +75,6 @@ const {
   showAutopsyReport,
   answer1,
   answer2,
-  timeSeconds,
   openWindow,
   closeWindow,
   handleWifiConnected,
@@ -97,3 +97,4 @@ body, html {
   width: 100vw; height: 100vh; position: relative;
 }
 </style>
+

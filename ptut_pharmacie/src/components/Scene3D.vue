@@ -9,7 +9,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js'
-import { useGameState } from '@/composables/useGameState.vue'
+import { useGameState } from '@/composables/useGameState.js'
 
 const containerRef = ref(null)
 const SKY_COLOR = 0x87ceeb
@@ -25,14 +25,14 @@ const {
   discoverClue,
 } = useGameState()
 
-// ── Three.js core ──────────────────────────────────────────────
+// Variables Three.js
 let renderer, scene, camera, controls
 let raycaster, pointer
 let animationId
 const interactiveObjects = []
 let rewardMesh = null
 
-// ── Which meshes are interactive ───────────────────────────────
+// Objets interactifs
 function isInteractiveName(name) {
   if (!name) return false
   const n = name.toLowerCase()
@@ -48,7 +48,6 @@ function collectInteractives(object) {
   object.traverse((child) => {
     if (child.isMesh && isInteractiveName(child.name)) {
       interactiveObjects.push(child)
-      console.log('Interactive:', child.name)
     }
     if (child.isMesh && child.name === 'trousse_premier_secours') {
       rewardMesh = child
@@ -56,7 +55,7 @@ function collectInteractives(object) {
   })
 }
 
-// ── Scene init ─────────────────────────────────────────────────
+// Initialisation de la scène
 function initScene() {
   const container = containerRef.value
 
@@ -118,14 +117,13 @@ function initScene() {
       scene.add(model)
       collectInteractives(model)
 
-      console.log('All meshes:')
-      model.traverse((c) => { if (c.isMesh) console.log('  -', c.name) })
+
 
       draco.dispose()
       ktx2.dispose()
     },
     (xhr) => { if (xhr.total) console.log(`Loading: ${(xhr.loaded / xhr.total * 100).toFixed(0)}%`) },
-    (err) => console.error('GLB error:', err)
+    (err) => console.error('Erreur chargement GLB:', err)
   )
 
   renderer.domElement.addEventListener('pointermove', onPointerMove)
@@ -134,7 +132,7 @@ function initScene() {
   animate()
 }
 
-// ── Pointer ────────────────────────────────────────────────────
+// Gestion du pointeur
 function onPointerMove(e) {
   const r = renderer.domElement.getBoundingClientRect()
   pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1
@@ -144,9 +142,8 @@ function onPointerMove(e) {
 function onClick() {
   raycaster.setFromCamera(pointer, camera)
 
-  // Debug log
   const all = raycaster.intersectObjects(scene.children, true)
-  if (all.length) console.log('Click:', all[0].object.name, '|', all[0].object.parent?.name || '-')
+  if (all.length) {}
 
   const hits = raycaster.intersectObjects(interactiveObjects, false)
   if (!hits.length) return
@@ -168,7 +165,7 @@ function onClick() {
   }
 }
 
-// ── Win animation ──────────────────────────────────────────────
+// Animation de victoire
 let animatingWin = false
 let winProgress = 0
 
@@ -184,7 +181,7 @@ function updateWinAnimation() {
   controls.target.lerp(t, 0.02)
 }
 
-// ── Resize ─────────────────────────────────────────────────────
+// Redimensionnement──
 function onResize() {
   const c = containerRef.value
   if (!c) return
@@ -193,7 +190,7 @@ function onResize() {
   renderer.setSize(c.clientWidth, c.clientHeight)
 }
 
-// ── Render loop ────────────────────────────────────────────────
+// Boucle de rendu
 function animate() {
   animationId = requestAnimationFrame(animate)
   controls.update()
@@ -201,7 +198,7 @@ function animate() {
   renderer.render(scene, camera)
 }
 
-// ── Lifecycle ──────────────────────────────────────────────────
+// Cycle de vie
 onMounted(initScene)
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationId)

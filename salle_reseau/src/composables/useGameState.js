@@ -1,4 +1,4 @@
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import confetti from 'canvas-confetti'
 
 export function useGameState() {
@@ -33,38 +33,6 @@ export function useGameState() {
   const safeCode = ref("")
   const safeInput = ref("")
 
-  const timeSeconds = ref(0)
-  let timerInterval = null
-
-  function startTimer() {
-    if (!timerInterval) {
-      timerInterval = setInterval(() => {
-        timeSeconds.value++
-      }, 1000)
-    }
-  }
-
-  function stopTimer() {
-    if (timerInterval) {
-      clearInterval(timerInterval)
-      timerInterval = null
-    }
-  }
-
-  function formatTime(seconds) {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0')
-    const s = (seconds % 60).toString().padStart(2, '0')
-    return m + ':' + s
-  }
-
-  onMounted(() => {
-    safeCode.value = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
-    startTimer()
-  })
-
-  onUnmounted(() => {
-    stopTimer()
-  })
 
   function triggerConfetti() {
     const duration = 5 * 1000
@@ -95,6 +63,12 @@ export function useGameState() {
     }, time)
   }
 
+  function initSafe() {
+    safeCode.value = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
+  }
+
+  initSafe()
+
   function handleWifiConnected() {
     if (isWifiConnected.value) return
     isWifiConnected.value = true
@@ -120,7 +94,6 @@ export function useGameState() {
 
     if (q1Correct && q3Correct) {
       gamePassed.value = true
-      stopTimer()
       triggerConfetti()
       closeWindow()
       showOS.value = false
@@ -173,7 +146,6 @@ export function useGameState() {
     showAutopsyReport,
     answer1,
     answer2,
-    timeSeconds,
     openWindow,
     closeWindow,
     showNotif,
@@ -184,9 +156,6 @@ export function useGameState() {
     pressPad,
     clearPad,
     checkSafeCode,
-    formatTime,
-    startTimer,
-    stopTimer,
     triggerConfetti
   }
 }

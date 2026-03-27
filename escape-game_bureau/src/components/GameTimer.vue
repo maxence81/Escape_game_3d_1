@@ -1,77 +1,84 @@
-<template>
-  <div class="game-timer">{{ displayTime }}</div>
+﻿<template>
+  <div class="game-timer">
+    <div class="timer-label">TEMPS ÉCOULÉ</div>
+    <div class="timer-value">{{ displayTime }}</div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
-const hours = ref(0)
-const minutes = ref(0)
-const seconds = ref(0)
-const displayTime = ref('00:00:00')
+const props = defineProps({
+  timeSeconds: {
+    type: Number,
+    default: -1
+  },
+  stopped: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const internalTime = ref(0)
 let timer = null
 
-function formatTime(val) {
-  return val < 10 ? '0' + val : val
-}
+const displayTime = computed(() => {
+  const current = props.timeSeconds !== -1 ? props.timeSeconds : internalTime.value
+  const m = Math.floor(current / 60).toString().padStart(2, '0')
+  const s = (current % 60).toString().padStart(2, '0')
+  return m + ':' + s
+})
 
-function updateDisplay() {
-  displayTime.value = `${formatTime(hours.value)}:${formatTime(minutes.value)}:${formatTime(seconds.value)}`
-}
-
-function startTimer() {
-  if (timer) return
-  timer = setInterval(() => {
-    seconds.value++
-    if (seconds.value === 60) {
-      seconds.value = 0
-      minutes.value++
-      if (minutes.value === 60) {
-        minutes.value = 0
-        hours.value++
-      }
-    }
-    updateDisplay()
-  }, 1000)
-}
-
-function stopTimer() {
-  clearInterval(timer)
-  timer = null
-}
-
-function getTimerValue() {
-  return displayTime.value
-}
-
-// Expose to window for sub-iframes
-window.startTimer = startTimer
-window.stopTimer = stopTimer
-window.getTimerValue = getTimerValue
+// Compatibility for iframes
+window.getTimerValue = () => displayTime.value
 
 onMounted(() => {
-  startTimer()
+  if (props.timeSeconds === -1) {
+    const savedTime = localStorage.getItem('escapeGlobalTimer')
+    if (savedTime) {
+      internalTime.value = parseInt(savedTime, 10)
+    }
+    
+    timer = setInterval(() => {
+      if (!props.stopped) {
+        internalTime.value++
+        localStorage.setItem('escapeGlobalTimer', internalTime.value.toString())
+      }
+    }, 1000)
+  }
 })
 
 onBeforeUnmount(() => {
-  stopTimer()
+  if (timer) clearInterval(timer)
 })
 </script>
 
 <style scoped>
 .game-timer {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  color: #50ef87;
-  font-family: 'Source Code Pro', monospace;
-  font-size: 24px;
-  font-weight: bold;
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: 2px solid #50ef87;
-  z-index: 100;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  top: 24px;
+  right: 24px;
+  background: rgba(15, 23, 42, 0.9);
+  border-right: 4px solid #38bdf8;
+  padding: 12px 20px;
+  color: #f1f5f9;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  z-index: 9999;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  text-align: right;
+  backdrop-filter: blur(8px);
+  user-select: none;
+}
+.timer-label {
+  font-size: 0.7rem;
+  font-weight: 900;
+  color: #38bdf8;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+.timer-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
 }
 </style>

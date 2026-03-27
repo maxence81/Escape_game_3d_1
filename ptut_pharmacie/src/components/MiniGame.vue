@@ -3,17 +3,17 @@
     <button class="minigame-close" @click="closeGame">✕</button>
     <canvas ref="canvasRef" :width="CANVAS_W" :height="CANVAS_H"></canvas>
 
-    <!-- Victory screen -->
+
     <div v-if="victory" class="victory-screen">
-      <h2>🎉 Victoire !</h2>
+      <h2>Victoire !</h2>
       <p>Le pingouin gardien est vaincu.</p>
       <p class="victory-code">Un papier tombe de la peluche…</p>
       <button class="btn-continue" @click="$emit('victory')">Récupérer le papier</button>
     </div>
 
-    <!-- Defeat screen -->
+
     <div v-if="defeated" class="defeat-screen">
-      <h2>💀 Défaite…</h2>
+      <h2>Défaite…</h2>
       <p>Le pingouin vous a terrassé.</p>
       <button class="btn-retry" @click="restartGame">Réessayer</button>
     </div>
@@ -26,7 +26,7 @@ import { loadImage, SpriteAnimation } from '../composables/useSpriteEngine.vue'
 
 const emit = defineEmits(['victory', 'close'])
 
-// ── Constants ──
+// Constantes
 const CANVAS_W = 800
 const CANVAS_H = 450
 const GRAVITY = 0.6
@@ -38,7 +38,7 @@ const canvasRef = ref(null)
 const victory = ref(false)
 const defeated = ref(false)
 
-// ── Audio ──
+// Audio
 let battleMusic = null
 let victoryMusic = null
 
@@ -80,7 +80,7 @@ function stopAllAudio() {
   }
 }
 
-// ── Game objects ──
+// Objets du jeu
 const keys = {}
 let animFrameId = null
 let lastTime = 0
@@ -132,7 +132,7 @@ const boss = {
 // Projectiles
 let projectiles = []
 
-// ── Sprite loading ──
+// Chargement des sprites
 async function loadAllSprites() {
   const [
     imgBearIdle, imgBearWalk,
@@ -169,7 +169,7 @@ async function loadAllSprites() {
   attackFrames = [imgAtk1, imgAtk2, imgAtk3, imgAtk4]
 }
 
-// ── Input ──
+// Entrées clavier
 function onKeyDown(e) {
   keys[e.code] = true
   e.preventDefault()
@@ -179,7 +179,7 @@ function onKeyUp(e) {
   e.preventDefault()
 }
 
-// ── Collision helpers ──
+// Détection de collisions
 function rectOverlap(a, b) {
   return (
     a.x < b.x + b.w &&
@@ -209,7 +209,7 @@ function resolveplatformCollisions(entity) {
   }
 }
 
-// ── Player update ──
+// Mise à jour du joueur
 function updatePlayer(dt) {
   const speed = 3.5
   let moving = false
@@ -286,7 +286,7 @@ function updatePlayer(dt) {
   }
 }
 
-// ── Boss AI ──
+// IA du boss
 function updateBoss(dt) {
   // Determine phase
   if (boss.hp > 14) boss.phase = 1
@@ -473,7 +473,7 @@ function updateBoss(dt) {
   if (boss.x + boss.w / 2 > CANVAS_W) boss.x = CANVAS_W - boss.w / 2
 }
 
-// ── Projectiles ──
+// Projectiles
 function updateProjectiles(dt) {
   for (const p of projectiles) {
     p.timer -= dt
@@ -504,7 +504,7 @@ function updateProjectiles(dt) {
   projectiles = projectiles.filter(p => p.alive)
 }
 
-// ── Damage ──
+// Dégâts
 function damagePlayer(amount) {
   if (player.invincible || defeated.value || victory.value) return
   player.hp -= amount
@@ -542,7 +542,7 @@ function damageBoss(amount) {
   }
 }
 
-// ── Render ──
+// Rendu graphique
 function render(ctx) {
   // Background gradient
   const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_H)
@@ -683,7 +683,7 @@ function render(ctx) {
     // Label
     ctx.fillStyle = '#fff'
     ctx.font = 'bold 12px sans-serif'
-    ctx.fillText('🐧 Boss', barX, barY - 4)
+    ctx.fillText('Boss', barX, barY - 4)
     ctx.restore()
   }
 
@@ -707,7 +707,7 @@ function render(ctx) {
   }
 }
 
-// ── Game loop ──
+// Boucle de jeu
 function gameLoop(timestamp) {
   if (!gameRunning) return
 
@@ -729,7 +729,7 @@ function gameLoop(timestamp) {
   animFrameId = requestAnimationFrame(gameLoop)
 }
 
-// ── Reset / restart ──
+// Réinitialisation
 function resetState() {
   player.x = 100
   player.y = GROUND_Y
@@ -780,13 +780,12 @@ function closeGame() {
   emit('close')
 }
 
-// ── Lifecycle ──
+// Cycle de vie
 onMounted(async () => {
   try {
     await loadAllSprites()
-    console.log('Mini-game: all sprites loaded successfully')
   } catch (err) {
-    console.error('Mini-game: sprite load error', err)
+    console.error('Erreur chargement sprites:', err)
   }
   initAudio()
   player.currentSprite = bearIdle
