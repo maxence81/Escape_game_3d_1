@@ -1,4 +1,4 @@
-﻿import * as THREE from 'three'
+import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -12,7 +12,7 @@ import { ref } from 'vue'
 export function useThreeScene(container, props, emit) {
   const isLoading = ref(true)
   const loadingProgress = ref(0)
-  
+
   let scene, camera, renderer, composer
   let orbitControls, dragControls
   let reqId
@@ -50,7 +50,7 @@ export function useThreeScene(container, props, emit) {
     bloomPass.threshold = 0.95
     bloomPass.strength = 0.2
     bloomPass.radius = 0.5
-    
+
     composer = new EffectComposer(renderer)
     composer.addPass(renderScene)
     composer.addPass(bloomPass)
@@ -62,18 +62,18 @@ export function useThreeScene(container, props, emit) {
     orbitControls.maxDistance = 10
     orbitControls.target.set(0, 1, 0)
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2.0)
     scene.add(ambientLight)
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2)
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2.0)
     hemiLight.position.set(0, 10, 0)
     scene.add(hemiLight)
 
-    const dirLightFront = new THREE.DirectionalLight(0xffffff, 1.0)
+    const dirLightFront = new THREE.DirectionalLight(0xffffff, 2.0)
     dirLightFront.position.set(10, 10, 10)
     scene.add(dirLightFront)
 
-    const dirLightBack = new THREE.DirectionalLight(0xffffff, 0.6)
+    const dirLightBack = new THREE.DirectionalLight(0xffffff, 1.0)
     dirLightBack.position.set(-10, 10, -10)
     scene.add(dirLightBack)
 
@@ -104,9 +104,9 @@ export function useThreeScene(container, props, emit) {
             if (name.includes('wifi')) wifiMesh = child
             if (name.includes('socket')) socketMesh = child
             if (name.includes('cylinder003_13')) monitorMesh = child
-            if (name.includes('safe') ) {
-               safeMesh = child
-               if (name.includes('door') || name.includes('porte')) safeDoorMesh = child
+            if (name.includes('safe')) {
+              safeMesh = child
+              if (name.includes('door') || name.includes('porte')) safeDoorMesh = child
             }
           }
         })
@@ -132,36 +132,36 @@ export function useThreeScene(container, props, emit) {
 
   function postLoadSetup(hasRealModel) {
     isLoading.value = false
-    
+
     if (wifiMesh) {
       objectsToDrag.push(wifiMesh)
       dragControls = new DragControls(objectsToDrag, camera, renderer.domElement)
-      
+
       dragControls.addEventListener('dragstart', function (event) {
         orbitControls.enabled = false
         if (event.object.material) event.object.material.emissiveIntensity = 1.0
       })
-      
-      dragControls.addEventListener('drag', function(event) {
-         if (socketMesh) {
-            const dist = event.object.position.distanceTo(socketMesh.position)
-            if (dist < 1.0) {
-               event.object.position.copy(socketMesh.position)
-               event.object.position.z += 0.2
-               emit('onWifiConnected')
-               dragControls.enabled = false
-               orbitControls.enabled = true
-               if (event.object.material) event.object.material.emissive.setHex(0x00ff00)
-            }
-         }
+
+      dragControls.addEventListener('drag', function (event) {
+        if (socketMesh) {
+          const dist = event.object.position.distanceTo(socketMesh.position)
+          if (dist < 1.0) {
+            event.object.position.copy(socketMesh.position)
+            event.object.position.z += 0.2
+            emit('onWifiConnected')
+            dragControls.enabled = false
+            orbitControls.enabled = true
+            if (event.object.material) event.object.material.emissive.setHex(0x00ff00)
+          }
+        }
       })
 
       dragControls.addEventListener('dragend', function (event) {
         orbitControls.enabled = true
         if (props.wifiConnected && event.object.material) {
-           event.object.material.emissive.setHex(0x00ff00)
+          event.object.material.emissive.setHex(0x00ff00)
         } else if (event.object.material) {
-           event.object.material.emissiveIntensity = 0.5
+          event.object.material.emissiveIntensity = 0.5
         }
       })
     }
@@ -169,32 +169,32 @@ export function useThreeScene(container, props, emit) {
 
   function updateMonitorState(isConnected) {
     if (monitorMesh && monitorMesh.material) {
-       if (isConnected) {
-           monitorMesh.material.emissive.setHex(0x00ffff)
-           monitorMesh.material.emissiveIntensity = 1.0
-       } else {
-           monitorMesh.material.emissive.setHex(0xff0000)
-           monitorMesh.material.emissiveIntensity = 0.5
-       }
+      if (isConnected) {
+        monitorMesh.material.emissive.setHex(0x00ffff)
+        monitorMesh.material.emissiveIntensity = 1.0
+      } else {
+        monitorMesh.material.emissive.setHex(0xff0000)
+        monitorMesh.material.emissiveIntensity = 0.5
+      }
     }
   }
-  
+
   function openSafeDoor() {
-      const target = safeDoorMesh || safeMesh
-      if (target) {
-         const startR = target.rotation.y
-         const targetR = startR + Math.PI / 2
-         const duration = 1000
-         const startTime = performance.now()
-         
-         function animDoor(time) {
-            const elaps = time - startTime
-            const t = Math.min(elaps / duration, 1)
-            target.rotation.y = startR + (targetR - startR) * t
-            if (t < 1) requestAnimationFrame(animDoor)
-         }
-         requestAnimationFrame(animDoor)
+    const target = safeDoorMesh || safeMesh
+    if (target) {
+      const startR = target.rotation.y
+      const targetR = startR + Math.PI / 2
+      const duration = 1000
+      const startTime = performance.now()
+
+      function animDoor(time) {
+        const elaps = time - startTime
+        const t = Math.min(elaps / duration, 1)
+        target.rotation.y = startR + (targetR - startR) * t
+        if (t < 1) requestAnimationFrame(animDoor)
       }
+      requestAnimationFrame(animDoor)
+    }
   }
 
   const onWindowResize = () => {
@@ -225,14 +225,14 @@ export function useThreeScene(container, props, emit) {
       let current = clickedOb
       let clickedName = ""
       while (current && current !== scene) {
-         clickedName += current.name.toLowerCase()
-         current = current.parent
+        clickedName += current.name.toLowerCase()
+        current = current.parent
       }
 
       if (clickedName.includes('monitor') || clickedName.includes('cylinder003_13')) {
-         emit('onMonitorClick')
-      } else if (clickedName.includes('safe'))  {
-         emit('onSafeClick')
+        emit('onMonitorClick')
+      } else if (clickedName.includes('safe')) {
+        emit('onSafeClick')
       }
     }
   }
