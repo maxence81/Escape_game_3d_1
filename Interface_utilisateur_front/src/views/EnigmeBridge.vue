@@ -21,34 +21,17 @@
 
     <!-- Iframe contenant l'enigme -->
     <div class="enigma-frame-container">
-      <iframe
-        ref="enigmaFrame"
-        :src="enigmaUrl"
-        class="enigma-iframe"
-        allow="fullscreen"
-        @load="onFrameLoad"
-      ></iframe>
-
-      <!-- Overlay de chargement -->
-      <div v-if="frameLoading" class="frame-loading">
-        <div class="spinner"></div>
-        <p>Chargement de l'enigme...</p>
-      </div>
-
-      <!-- Overlay si enigme non disponible -->
-      <div v-if="frameError" class="frame-error">
-        <h3>Enigme non disponible</h3>
-        <p>Le serveur de l'enigme (port {{ enigmaPort }}) n'est pas accessible.</p>
-        <p class="error-hint">Lancez le projet avec : <code>npm run dev -- --port {{ enigmaPort }}</code></p>
-        <div class="dev-buttons">
-          <button @click="markCompleted" class="btn-dev-complete">
-            ✓ Marquer comme complété (mode test)
-          </button>
-          <button @click="goBack" class="btn-back-error">
-            Retour au dashboard
-          </button>
-        </div>
-      </div>
+      <Suspense>
+        <template #default>
+          <component :is="activeComponent" />
+        </template>
+        <template #fallback>
+          <div class="frame-loading">
+            <div class="spinner"></div>
+            <p>Chargement de l'enigme...</p>
+          </div>
+        </template>
+      </Suspense>
     </div>
 
     <!-- Modal de confirmation de sortie -->
@@ -77,7 +60,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { gameService } from '../services/api'
 
@@ -87,10 +70,16 @@ const props = defineProps({
   enigmaPort: { type: Number, required: true },
 })
 
+const componentsMap = {
+  1: defineAsyncComponent(() => import('../components/enigmes/bureau/App.vue')),
+  2: defineAsyncComponent(() => import('../components/enigmes/chambre_patient/App.vue')),
+  3: defineAsyncComponent(() => import('../components/enigmes/pharmacie/App.vue')),
+  4: defineAsyncComponent(() => import('../components/enigmes/salle_reseau/App.vue')),
+  5: defineAsyncComponent(() => import('../components/enigmes/salle_reunion/App.vue')),
+}
+const activeComponent = computed(() => componentsMap[props.enigmaId])
+
 const router = useRouter()
-const enigmaFrame = ref(null)
-const frameLoading = ref(true)
-const frameError = ref(false)
 const showExitModal = ref(false)
 const showSuccessModal = ref(false)
 
@@ -104,27 +93,10 @@ const displayTime = computed(() => {
   return `${m}:${s}`
 })
 
-// URL de l'enigme
-const enigmaUrl = computed(() => `http://localhost:${props.enigmaPort}`)
-
-function onFrameLoad() {
-  frameLoading.value = false
-  // Vérification si l'iframe a chargé correctement
-  try {
-    const iframe = enigmaFrame.value
-    if (iframe && iframe.contentDocument && iframe.contentDocument.title) {
-      frameError.value = false
-    }
-  } catch (e) {
-    // Cross-origin - l'enigme est accessible, pas d'erreur
-    frameError.value = false
-  }
-}
-
 // Écoute les messages postMessage des enigmes
 function handleMessage(event) {
-  // Accepter les messages des enigmes (tous les ports locaux)
-  if (!event.origin.includes('localhost')) return
+  // Accepter les messages de la même origine
+  if (event.origin !== window.location.origin) return
 
   const { type, enigmaId, success, timeSeconds } = event.data || {}
 
@@ -203,19 +175,10 @@ onMounted(() => {
 
   // Écouter les messages des enigmes
   window.addEventListener('message', handleMessage)
-
-  // Timeout pour détecter si l'enigme ne charge pas
-  loadTimeout = setTimeout(() => {
-    if (frameLoading.value) {
-      frameLoading.value = false
-      frameError.value = true
-    }
-  }, 8000)
 })
 
 onBeforeUnmount(() => {
   clearInterval(timerInterval)
-  clearTimeout(loadTimeout)
   window.removeEventListener('message', handleMessage)
 })
 </script>

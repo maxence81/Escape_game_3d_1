@@ -1,9 +1,25 @@
 package com.escapegame.chl_backend.dto.request;
 
-import lombok.Data;
-
-@Data
 public class PuzzleSubmissionDTO {
-    private Long enigmaId;         // ID de l'énigme complétée
-    private Integer tempsPasseSec; // Temps que le joueur a mis (envoyé par le frontend)
+
+    private String puzzleId;
+    private String answer;
+
+    public PuzzleSubmissionDTO() {}
+
+    public String getPuzzleId() {
+        return puzzleId;
+    }
+
+    public void setPuzzleId(String puzzleId) {
+        this.puzzleId = puzzleId;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
 }

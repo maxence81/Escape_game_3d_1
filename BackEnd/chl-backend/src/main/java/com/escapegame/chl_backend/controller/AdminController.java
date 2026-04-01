@@ -24,15 +24,15 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-    // 1. Obtener Estadísticas Globales del Dashboard
+    // 1. Estadísticas globales del Dashboard
     @GetMapping("/dashboard-stats")
-    @PreAuthorize("hasRole('ADMIN')") // Solo usuarios con rol ADMIN pueden entrar
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminDashboardStatsDTO> getDashboardStats() {
         AdminDashboardStatsDTO stats = adminService.getGlobalStats();
         return ResponseEntity.ok(stats);
     }
 
-    // 2. Obtener la lista de todos los jugadores (con sus datos de jugador)
+    // 2. Lista de todos los jugadores
     @GetMapping("/players")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Player>> getAllPlayers() {
@@ -40,7 +40,8 @@ public class AdminController {
         return ResponseEntity.ok(players);
     }
 
-    // 3. Obtener el Radar Chart (Competencias) de un jugador específico
+    // 3. Estadísticas (radar chart) de un jugador específico
+    // Ruta: /api/admin/player/{id}/stats  (usada por AdminJoueurDetail.vue y adminService.getPlayerDetails)
     @GetMapping("/player/{id}/stats")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlayerDetailDTO> getPlayerStats(@PathVariable Long id) {
@@ -50,5 +51,12 @@ public class AdminController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);
         }
+    }
+
+    // 4. Alias con /players/{id}/stats para compatibilidad con el frontend
+    @GetMapping("/players/{id}/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PlayerDetailDTO> getPlayerStatsAlias(@PathVariable Long id) {
+        return getPlayerStats(id);
     }
 }

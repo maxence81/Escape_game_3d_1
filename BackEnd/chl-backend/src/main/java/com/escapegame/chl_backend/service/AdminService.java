@@ -1,31 +1,51 @@
 package com.escapegame.chl_backend.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.escapegame.chl_backend.dto.response.AdminDashboardStatsDTO;
 import com.escapegame.chl_backend.dto.response.PlayerDetailDTO;
-import com.escapegame.chl_backend.model.*;
-import com.escapegame.chl_backend.repository.*;
+import com.escapegame.chl_backend.model.GameSession;
+import com.escapegame.chl_backend.model.Player;
+import com.escapegame.chl_backend.model.PuzzleAttempt;
+import com.escapegame.chl_backend.model.SkillType;
+import com.escapegame.chl_backend.repository.GameSessionRepository;
+import com.escapegame.chl_backend.repository.PlayerRepository;
+import com.escapegame.chl_backend.repository.PuzzleAttemptRepository;
 
 @Service
 public class AdminService {
 
-    @Autowired private PlayerRepository playerRepository;
-    @Autowired private GameSessionRepository gameSessionRepository;
-    @Autowired private PuzzleAttemptRepository puzzleAttemptRepository;
+    @Autowired
+    private PlayerRepository playerRepository;
 
+    @Autowired
+    private GameSessionRepository gameSessionRepository;
+
+    @Autowired
+    private PuzzleAttemptRepository puzzleAttemptRepository;
+
+    /**
+     * Estadísticas globales para el dashboard del admin
+     */
     public AdminDashboardStatsDTO getGlobalStats() {
         AdminDashboardStatsDTO stats = new AdminDashboardStatsDTO();
 
-        stats.setTotalPlayers((int) playerRepository.count());
+        // Total de jugadores
+        long totalPlayers = playerRepository.count();
+        stats.setTotalPlayers((int) totalPlayers);
 
+        // Tiempo promedio (en minutos) de las sesiones terminadas
         List<GameSession> allSessions = gameSessionRepository.findAll();
         List<GameSession> completedSessions = allSessions.stream()
-                .filter(s -> s.getTempsEnLigne() != null)
-                .toList();
+                .filter(s -> s.getTempsEnLigne() != null && s.getTempsEnLigne() > 0)
+                .collect(Collectors.toList());
 
         if (!completedSessions.isEmpty()) {
             double totalSeconds = completedSessions.stream()
@@ -36,18 +56,30 @@ public class AdminService {
             stats.setAverageTimeMinutes(0);
         }
 
-        // Taux de complétion = sessions terminées / sessions totales
-        double completionRate = allSessions.isEmpty() ? 0
-                : (double) completedSessions.size() / allSessions.size() * 100.0;
-        stats.setSuccessRate(completionRate);
+        // Tasa de éxito global (% de puzzles exitosos sobre total de intentos)
+        List<PuzzleAttempt> allAttempts = puzzleAttemptRepository.findAll();
+        if (!allAttempts.isEmpty()) {
+            long successCount = allAttempts.stream()
+                    .filter(a -> Boolean.TRUE.equals(a.getEstReussi()))
+                    .count();
+            stats.setSuccessRate((double) successCount / allAttempts.size() * 100.0);
+        } else {
+            stats.setSuccessRate(0);
+        }
 
         return stats;
     }
 
+    /**
+     * Lista de todos los jugadores
+     */
     public List<Player> findAllPlayers() {
         return playerRepository.findAll();
     }
 
+    /**
+     * Detalle de un jugador: nombre, email y radar de competencias
+     */
     public PlayerDetailDTO getPlayerDetails(Long userId) {
         Player player = playerRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Joueur non trouvé"));
@@ -56,35 +88,34 @@ public class AdminService {
         detail.setPlayerName(player.getPrenom() + " " + player.getNom());
         detail.setEmail(player.getEmail());
 
+        // Recuperar todos los intentos del jugador
         List<GameSession> sessions = gameSessionRepository.findByPlayer(player);
         List<PuzzleAttempt> attempts = new ArrayList<>();
         for (GameSession session : sessions) {
             attempts.addAll(puzzleAttemptRepository.findBySession(session));
         }
 
-        // Scores initiaux à 50 (neutre)
+        // Inicializar todas las competencias a 50 (valor neutro)
         Map<String, Integer> skills = new HashMap<>();
         for (SkillType skill : SkillType.values()) {
             skills.put(skill.name(), 50);
         }
 
-        // Chaque énigme complétée améliore la compétence liée
-        // Le bonus dépend du temps : plus rapide = plus de points
+        // Ajustar según los intentos: +10 si correcto, -5 si incorrecto
         for (PuzzleAttempt attempt : attempts) {
-            if (attempt.getEnigma() == null || attempt.getEnigma().getCompetence() == null) continue;
-            if (!Boolean.TRUE.equals(attempt.getEstReussi())) continue;
+            // Verificación de nulos para evitar NullPointerException
+            if (attempt.getEnigma() == null) continue;
+            if (attempt.getEnigma().getCompetence() == null) continue;
+            if (attempt.getEstReussi() == null) continue;
 
             String skillName = attempt.getEnigma().getCompetence().name();
-            int current = skills.getOrDefault(skillName, 50);
+            int currentScore = skills.getOrDefault(skillName, 50);
 
-            // Bonus basé sur le temps : < 60s = +15, < 120s = +10, sinon +5
-            int bonus = 5;
-            if (attempt.getTempsPasseSec() != null) {
-                if (attempt.getTempsPasseSec() < 60) bonus = 15;
-                else if (attempt.getTempsPasseSec() < 120) bonus = 10;
+            if (Boolean.TRUE.equals(attempt.getEstReussi())) {
+                skills.put(skillName, Math.min(100, currentScore + 10));
+            } else {
+                skills.put(skillName, Math.max(0, currentScore - 5));
             }
-
-            skills.put(skillName, Math.min(100, current + bonus));
         }
 
         detail.setSkills(skills);

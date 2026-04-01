@@ -35,14 +35,15 @@ public class GameService {
 
         Player player = (Player) user;
 
-        // Si une session est déjà ouverte, la terminer proprement
-        sessionRepository.findFirstByPlayerAndDateFinIsNullOrderByDateDebutDesc(player)
-                .ifPresent(s -> {
-                    s.setDateFin(LocalDateTime.now());
-                    long seconds = Duration.between(s.getDateDebut(), s.getDateFin()).getSeconds();
-                    s.setTempsEnLigne((int) seconds);
-                    sessionRepository.save(s);
-                });
+        // Si hay sesión activa, cerrarla antes de crear una nueva
+        sessionRepository
+            .findFirstByPlayerAndDateFinIsNullOrderByDateDebutDesc(player)
+            .ifPresent(s -> {
+                s.setDateFin(LocalDateTime.now());
+                long seconds = Duration.between(s.getDateDebut(), s.getDateFin()).getSeconds();
+                s.setTempsEnLigne((int) seconds);
+                sessionRepository.save(s);
+            });
 
         GameSession session = new GameSession();
         session.setPlayer(player);
@@ -59,35 +60,39 @@ public class GameService {
                 .findFirstByPlayerAndDateFinIsNullOrderByDateDebutDesc((Player) user)
                 .orElseThrow(() -> new RuntimeException("Aucune session active trouvée."));
 
+        // Recuperar puzzleId y answer directamente desde los campos del DTO
+        String puzzleIdStr = request.getPuzzleId();
+        String answer = request.getAnswer();
+
         Long enigmaId;
         try {
-            enigmaId = Long.parseLong(request.getPuzzleId());
+            enigmaId = Long.valueOf(puzzleIdStr);
         } catch (NumberFormatException e) {
-            throw new RuntimeException("ID d'énigme invalide: " + request.getPuzzleId());
+            throw new RuntimeException("ID d'énigme invalide: " + puzzleIdStr);
         }
 
         Enigma enigma = enigmaRepository.findById(enigmaId)
                 .orElseThrow(() -> new RuntimeException("Énigme non trouvée."));
 
-        // La réponse peut être "SUCCESS" (envoyée par le front après validation in-game)
-        // ou la réponse réelle à comparer
+        // Determinar si es correcto
         boolean isCorrect;
-        String answer = request.getAnswer();
-
         if ("SUCCESS".equalsIgnoreCase(answer)) {
-            // Le front a déjà validé la réponse dans l'enigme, on fait confiance
             isCorrect = true;
         } else if ("FAIL".equalsIgnoreCase(answer)) {
             isCorrect = false;
         } else {
-            // Vérification classique de la réponse
-            isCorrect = enigma.getReponseAttendue() != null &&
-                        enigma.getReponseAttendue().equalsIgnoreCase(answer);
+            // Comparación con la respuesta esperada del enigma
+            String reponseAttendue = enigma.getReponseAttendue();
+            isCorrect = reponseAttendue != null && reponseAttendue.equalsIgnoreCase(answer);
         }
 
-        // Calculer le temps passé depuis le début de la session
-        int tempsPasseSec = (int) Duration.between(session.getDateDebut(), LocalDateTime.now()).getSeconds();
+        // Calcular tiempo pasado desde el inicio de la sesión
+        int tempsPasseSec = (int) Duration.between(
+            session.getDateDebut(),
+            LocalDateTime.now()
+        ).getSeconds();
 
+        // Crear el intento — usar Integer.valueOf() para evitar autoboxing ambiguo
         PuzzleAttempt attempt = new PuzzleAttempt();
         attempt.setSession(session);
         attempt.setEnigma(enigma);
@@ -103,7 +108,6 @@ public class GameService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        // Si pas de session active, retourner la dernière session (déjà terminée)
         GameSession session = sessionRepository
                 .findFirstByPlayerAndDateFinIsNullOrderByDateDebutDesc((Player) user)
                 .orElseThrow(() -> new RuntimeException("Aucune session active trouvée."));
