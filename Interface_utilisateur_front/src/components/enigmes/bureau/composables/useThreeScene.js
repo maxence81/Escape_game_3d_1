@@ -134,7 +134,7 @@ export function useThreeScene(canvasRef, emit) {
     gltfLoader.setKTX2Loader(ktx2Loader)
 
     gltfLoader.load(
-      '/model/ptut_server_compressed.glb',
+      '/enigmes/bureau/model/ptut_server_compressed.glb',
       (gltf) => {
         gltf.scene.traverse((child) => {
           if (child.isMesh) {

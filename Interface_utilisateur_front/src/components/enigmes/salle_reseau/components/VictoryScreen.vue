@@ -4,7 +4,6 @@
       <h2 class="victory-title">Salle Reseau Terminee</h2>
       <p class="victory-subtitle">Vous avez resolu toutes les enigmes.</p>
       <p class="final-time">Temps final : {{ finalTime }}</p>
-      <p class="final-score">Score : {{ finalScore }} / 1000</p>
 
     </div>
   </div>
@@ -14,14 +13,10 @@
 import { ref, onMounted } from 'vue'
 
 const finalTime = ref('00:00')
-const finalScore = ref(0)
 
 onMounted(() => {
   if (window.getTimerValue) {
     finalTime.value = window.getTimerValue()
-  }
-  if (window.getScoreValue) {
-    finalScore.value = window.getScoreValue()
   }
 })
 </script>
@@ -68,7 +63,7 @@ onMounted(() => {
   margin-bottom: 10px;
 }
 
-.final-time, .final-score {
+.final-time {
   text-align: center;
   font-size: 1.4rem;
   font-weight: bold;

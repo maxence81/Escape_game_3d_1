@@ -32,8 +32,6 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['hint-shown'])
-
 const hintCount = ref(0)
 const hintLimit = computed(() => props.hints.length)
 const limitReached = computed(() => hintCount.value >= hintLimit.value)
@@ -45,9 +43,7 @@ let hideTimeout = null
 
 function getHint() {
   if (hintCount.value < hintLimit.value) {
-    const hint = props.hints[hintCount.value]
-    toastMessage.value = hint
-    emit('hint-shown', hint)
+    toastMessage.value = props.hints[hintCount.value]
     hintCount.value++
   } else {
     toastMessage.value = "Plus d'indices disponibles !"
@@ -62,7 +58,7 @@ function getHint() {
 
 <style scoped>
 .hint-btn-wrapper {
-  position: fixed;
+  position: absolute;
   top: 24px;
   left: 24px;
   z-index: 9999;

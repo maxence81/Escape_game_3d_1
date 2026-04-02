@@ -1,9 +1,8 @@
 import { reactive } from 'vue';
 import confetti from 'canvas-confetti';
-import { notifyEnigmaCompleted } from '../utils/enigme-completion.js';
+import { notifyEnigmaCompleted } from '@/utils/enigme-completion';
 
 export const gameState = reactive({
-  showIntro: true,
   isStarted: true,
   showChoiceOverlay: false,
   discoveredBouton: false,
@@ -11,10 +10,6 @@ export const gameState = reactive({
   gameOver: false,
   choiceMessage: ''
 });
-
-export function finishIntro() {
-  gameState.showIntro = false;
-}
 
 export function startGame() {
   gameState.isStarted = true;
@@ -68,7 +63,6 @@ export function makeChoice(answer) {
 export function useGameState() {
   return {
     gameState,
-    finishIntro,
     startGame,
     openChoice,
     closeChoice,

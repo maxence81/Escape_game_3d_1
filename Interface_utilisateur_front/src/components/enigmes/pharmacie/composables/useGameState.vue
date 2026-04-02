@@ -13,8 +13,6 @@ const discoveredClues = reactive([])
 const gameCompleted = ref(false)
 const validationMessage = ref('')
 const validationSuccess = ref(false)
-const terminalCode = ref(Math.floor(1000 + Math.random() * 9000).toString())
-
 
 function discoverClue(id) {
   if (!discoveredClues.includes(id)) {
@@ -34,7 +32,6 @@ function resetGame() {
   gameCompleted.value = false
   validationMessage.value = ''
   validationSuccess.value = false
-  terminalCode.value = Math.floor(1000 + Math.random() * 9000).toString()
 }
 
 export function useGameState() {
@@ -50,7 +47,6 @@ export function useGameState() {
     gameCompleted,
     validationMessage,
     validationSuccess,
-    terminalCode,
     discoverClue,
     resetGame,
   }
