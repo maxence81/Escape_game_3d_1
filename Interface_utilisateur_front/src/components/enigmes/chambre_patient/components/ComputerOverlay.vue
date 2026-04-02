@@ -123,8 +123,8 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { useGameState } from "../composables/useGameState.js"
-import { notifyEnigmaCompleted } from '@/utils/enigme-completion'
+import { useGameState } from '@/composables/useGameState.js'
+import { notifyEnigmaCompleted } from '../../../../Interface_utilisateur_front/src/utils/enigme-completion'
 
 const { showComputer, boxUnlocked, computerCompleted } = useGameState()
 

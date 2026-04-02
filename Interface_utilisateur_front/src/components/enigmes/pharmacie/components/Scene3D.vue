@@ -13,7 +13,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js'
-import { useGameState } from "../composables/useGameState.vue"
+import { useGameState } from '@/composables/useGameState.vue'
 
 const containerRef = ref(null)
 const SKY_COLOR = 0x87ceeb
@@ -27,6 +27,7 @@ const {
   currentMedicineName,
   gameCompleted,
   discoverClue,
+  discoveredClues,
 } = useGameState()
 
 // Variables Three.js
@@ -110,7 +111,7 @@ function initScene() {
   const skyMat = new THREE.MeshBasicMaterial({ color: SKY_COLOR })
 
   loader.load(
-    '/enigmes/pharmacie/model/Pharmacie_test_texture_3_compressed.glb',
+    '/model/Pharmacie_test_texture_3_compressed.glb',
     (gltf) => {
       const model = gltf.scene
       model.traverse((child) => {
@@ -167,7 +168,11 @@ function onClick() {
     isComputerUIOpen.value = true
     discoverClue('computer')
   } else if (name.startsWith('bear_doll')) {
-    showMiniGame.value = true
+    if (discoveredClues.includes('bear')) {
+      showBearInfo.value = true
+    } else {
+      showMiniGame.value = true
+    }
   } else if (name.startsWith('box_of_medicine')) {
     currentMedicineName.value = hits[0].object.name
     showMedicineInfo.value = true
