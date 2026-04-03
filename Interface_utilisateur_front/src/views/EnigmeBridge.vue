@@ -72,12 +72,11 @@ const props = defineProps({
 })
 
 const componentsMap = {
-  1: defineAsyncComponent(() => import('../components/enigmes/bureau/App.vue')),
+  1: defineAsyncComponent(() => import('../components/enigmes/salle_reseau/App.vue')),
   2: defineAsyncComponent(() => import('../components/enigmes/bureau/App.vue')),
   3: defineAsyncComponent(() => import('../components/enigmes/chambre_patient/App.vue')),
   4: defineAsyncComponent(() => import('../components/enigmes/pharmacie/App.vue')),
-  5: defineAsyncComponent(() => import('../components/enigmes/salle_reseau/App.vue')),
-  6: defineAsyncComponent(() => import('../components/enigmes/salle_reunion/App.vue')),
+  5: defineAsyncComponent(() => import('../components/enigmes/salle_reunion/App.vue')),
 }
 const activeComponent = computed(() => componentsMap[props.enigmaId])
 

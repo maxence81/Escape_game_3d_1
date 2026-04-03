@@ -49,6 +49,13 @@ const router = createRouter({
     },
 
     {
+      path: '/enigme/salle-reseau',
+      name: 'enigme-salle-reseau',
+      component: EnigmeBridge,
+      props: { enigmaId: 1, enigmaName: 'Salle Réseau', enigmaPort: 5177 },
+    },
+
+    {
       path: '/enigme/bureau',
       name: 'enigme-bureau',
       component: EnigmeBridge,
@@ -66,20 +73,15 @@ const router = createRouter({
       component: EnigmeBridge,
       props: { enigmaId: 4, enigmaName: 'Pharmacie', enigmaPort: 5176 },
     },
-    {
-      path: '/enigme/salle-reseau',
-      name: 'enigme-salle-reseau',
-      component: EnigmeBridge,
-      props: { enigmaId: 5, enigmaName: 'Salle Réseau', enigmaPort: 5177 },
-    },
+
     {
       path: '/enigme/salle-reunion',
       name: 'enigme-salle-reunion',
       component: EnigmeBridge,
-      props: { enigmaId: 6, enigmaName: 'Salle de Réunion', enigmaPort: 5178 },
+      props: { enigmaId: 5, enigmaName: 'Salle de Réunion', enigmaPort: 5178 },
     },
 
-    
+
   ]
 })
 
