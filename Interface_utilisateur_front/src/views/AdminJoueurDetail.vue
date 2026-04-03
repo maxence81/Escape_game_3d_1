@@ -2,204 +2,122 @@
   <div class="admin-layout">
     <header class="admin-header">
       <button @click="$router.push('/admin/joueurs')" class="btn-back">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Retour à la liste
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Retour à la liste des joueurs
       </button>
+      
+      <div v-if="!loading && player" class="admin-actions">
+        <span class="badge-admin">🔍 Mode Inspection</span>
+      </div>
     </header>
 
-    <!-- Loading -->
     <div v-if="loading" class="loading-row">
       <div class="spinner"></div>
       <span>Chargement du profil...</span>
     </div>
 
     <template v-else-if="player">
-
-      <!-- Banner perfil -->
       <div class="profile-banner glass-panel">
         <div class="profile-left">
-          <div class="avatar" :style="{ background: avatarColor }">
-            {{ playerInitials }}
-          </div>
+          <div class="avatar bg-pink">{{ playerInitials }}</div>
           <div class="profile-meta">
-            <h2>{{ player.playerName }}</h2>
+            <h2 class="capitalize-name">{{ player.playerName }}</h2>
             <div class="meta-stats">
-              <span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
-                </svg>
-                {{ player.email }}
-              </span>
+              <span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> {{ player.email }}</span>
             </div>
           </div>
         </div>
         <div class="profile-right">
           <div class="success-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-              fill="none" stroke="#eab308" stroke-width="2">
-              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-              <path d="M4 22h16"></path>
-              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-              <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path>
-            </svg>
-            <div class="rate-val">{{ globalScore }}%</div>
-            <div class="rate-label">Score global</div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <div class="rate-val color-cyan">{{ player.puzzlesResolved }} / {{ totalLevels }}</div>
+            <div class="rate-label">Niveaux complétés</div>
           </div>
         </div>
       </div>
 
-      <!-- KPIs de habilidades -->
       <div class="kpi-grid">
-        <div v-for="skill in skillsList" :key="skill.key" class="kpi-card">
-          <div class="kpi-info">
-            <span class="kpi-label">{{ skill.label }}</span>
-            <span class="kpi-value" :style="{ color: skill.color }">
-              {{ player.skills[skill.key] || 0 }}
-            </span>
-          </div>
-          <div class="skill-bar-container">
-            <div class="skill-bar-bg">
-              <div class="skill-bar-fill"
-                :style="{
-                  width: (player.skills[skill.key] || 0) + '%',
-                  background: skill.color
-                }">
+        <div class="kpi-card">
+          <div class="kpi-info"><span class="kpi-label">Énigmes résolues</span><span class="kpi-value">{{ player.puzzlesResolved }}/{{ totalLevels }}</span></div>
+          <div class="kpi-icon bg-blue"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-info"><span class="kpi-label">Temps total</span><span class="kpi-value">{{ player.totalTimeMinutes }} min</span></div>
+          <div class="kpi-icon bg-pink"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-info"><span class="kpi-label">Score global</span><span class="kpi-value">{{ globalScore }}/100</span></div>
+          <div class="kpi-icon bg-green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-info"><span class="kpi-label">Total erreurs</span><span class="kpi-value">{{ player.totalErrors }}</span></div>
+          <div class="kpi-icon bg-orange"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        
+        <div class="chart-card glass-panel">
+          <h4>Temps par Énigme (minutes)</h4>
+          <div class="chart-container flex-end bar-chart">
+            <div class="y-axis">
+              <span>{{ maxEnigmaTime }}</span>
+              <span>{{ Math.round(maxEnigmaTime * 0.75) }}</span>
+              <span>{{ Math.round(maxEnigmaTime * 0.5) }}</span>
+              <span>{{ Math.round(maxEnigmaTime * 0.25) }}</span>
+              <span>0</span>
+            </div>
+            <div class="bar-area">
+              <div v-if="player.enigmaTimes.length === 0" class="empty-state" style="width:100%; text-align:center;">
+                Aucune donnée
+              </div>
+              <div v-for="(enigma, i) in player.enigmaTimes" :key="i" class="bar-col">
+                <div class="bar" :style="{ height: (enigma.avgTime / maxEnigmaTime * 100) + '%', background: '#2dd4bf' }"></div>
+                <span class="text-truncate" :title="enigma.nom">{{ enigma.nom }}</span>
               </div>
             </div>
-            <span class="skill-pct">{{ player.skills[skill.key] || 0 }}/100</span>
           </div>
         </div>
-      </div>
 
-      <!-- Charts -->
-      <div class="charts-grid">
-
-        <!-- Radar de competencias -->
         <div class="chart-card glass-panel">
           <h4>Profil de Compétences</h4>
           <div class="radar-container">
             <svg viewBox="0 0 100 100" class="radar-chart">
-              <!-- Grilla del radar -->
-              <polygon points="50,10 88,37.6 73.5,82.4 26.5,82.4 12,37.6"
-                fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
-              <polygon points="50,20 78.5,40.7 67.6,74.3 32.4,74.3 21.5,40.7"
-                fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
-              <polygon points="50,30 69,45 61.8,66.2 38.2,66.2 31,45"
-                fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
-              <!-- Ejes -->
+              <polygon points="50,10 88,37.6 73.5,82.4 26.5,82.4 12,37.6" fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+              <polygon points="50,20 78.5,40.7 67.6,74.3 32.4,74.3 21.5,40.7" fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+              <polygon points="50,30 69,45 61.8,66.2 38.2,66.2 31,45" fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
               <line x1="50" y1="50" x2="50" y2="10" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
               <line x1="50" y1="50" x2="88" y2="37.6" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
               <line x1="50" y1="50" x2="73.5" y2="82.4" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
               <line x1="50" y1="50" x2="26.5" y2="82.4" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
               <line x1="50" y1="50" x2="12" y2="37.6" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
-              <!-- Polígono de datos dinámico -->
-              <polygon
-                :points="radarPoints"
-                fill="rgba(168, 85, 247, 0.35)"
-                stroke="#a855f7"
-                stroke-width="1.5"
-              />
-              <!-- Puntos en los vértices -->
-              <circle v-for="(pt, i) in radarVertices" :key="i"
-                :cx="pt.x" :cy="pt.y" r="1.8" fill="#a855f7"/>
-              <!-- Etiquetas -->
-              <text x="50" y="7" fill="white" font-size="3.2" text-anchor="middle">Rapidité</text>
-              <text x="92" y="37" fill="white" font-size="3.2" text-anchor="start">Précision</text>
-              <text x="76" y="87" fill="white" font-size="3.2" text-anchor="start">Logique</text>
-              <text x="24" y="87" fill="white" font-size="3.2" text-anchor="end">Créativité</text>
-              <text x="8" y="37" fill="white" font-size="3.2" text-anchor="end">Persévérance</text>
+              
+              <polygon :points="radarPoints" fill="rgba(34, 211, 238, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+              <circle v-for="(pt, i) in radarVertices" :key="i" :cx="pt.x" :cy="pt.y" r="1.5" fill="#22d3ee"/>
+              
+              <text x="50" y="8" fill="white" font-size="3" text-anchor="middle">Rapidité</text>
+              <text x="90" y="38" fill="white" font-size="3" text-anchor="start">Précision</text>
+              <text x="75" y="86" fill="white" font-size="3" text-anchor="start">Logique</text>
+              <text x="25" y="86" fill="white" font-size="3" text-anchor="end">Créativité</text>
+              <text x="10" y="38" fill="white" font-size="3" text-anchor="end">Persévérance</text>
             </svg>
           </div>
         </div>
 
-        <!-- Barras de skills -->
-        <div class="chart-card glass-panel">
-          <h4>Détail des Compétences</h4>
-          <div class="skills-detail-list">
-            <div v-for="skill in skillsList" :key="skill.key" class="skill-detail-row">
-              <span class="skill-detail-label">{{ skill.label }}</span>
-              <div class="skill-detail-bar-bg">
-                <div class="skill-detail-bar-fill"
-                  :style="{
-                    width: (player.skills[skill.key] || 0) + '%',
-                    background: skill.color
-                  }">
-                </div>
+        <div class="chart-card glass-panel" style="grid-column: span 2;">
+          <h4>Détails par Énigme</h4>
+          <div class="enigme-list">
+            <div v-for="enigme in computedEnigmasList" :key="enigme.id" class="enigme-item" :class="{ locked: enigme.status === 'VERROUILLÉ' }">
+              <div class="enigme-meta">
+                <strong>Énigme {{ enigme.id }} : {{ enigme.nom }}</strong>
+                <span v-if="enigme.status === 'RÉUSSI'" class="status-success">Réussi</span>
+                <span v-else-if="enigme.status === 'VERROUILLÉ'" class="status-locked">Verrouillé</span>
+                <span v-else class="status-start">À commencer</span>
               </div>
-              <span class="skill-detail-val">{{ player.skills[skill.key] || 0 }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Info general -->
-        <div class="chart-card glass-panel">
-          <h4>Informations du Joueur</h4>
-          <div class="info-list">
-            <div class="info-row">
-              <span class="info-label">Nom complet</span>
-              <span class="info-val">{{ player.playerName }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Email</span>
-              <span class="info-val">{{ player.email }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Score global</span>
-              <span class="info-val score-val">{{ globalScore }}%</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Meilleure compétence</span>
-              <span class="info-val">{{ bestSkill.label }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Compétence à améliorer</span>
-              <span class="info-val warn-val">{{ worstSkill.label }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Progresión visual -->
-        <div class="chart-card glass-panel">
-          <h4>Progression Globale</h4>
-          <div class="progression-visual">
-            <div class="prog-circle-wrapper">
-              <svg viewBox="0 0 120 120" class="prog-svg">
-                <!-- Círculo de fondo -->
-                <circle cx="60" cy="60" r="50"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.1)"
-                  stroke-width="8"/>
-                <!-- Círculo de progreso -->
-                <circle cx="60" cy="60" r="50"
-                  fill="none"
-                  stroke="#a855f7"
-                  stroke-width="8"
-                  stroke-linecap="round"
-                  :stroke-dasharray="`${globalScore * 3.14} 314`"
-                  transform="rotate(-90 60 60)"
-                  style="transition: stroke-dasharray 1s ease"/>
-                <text x="60" y="55" text-anchor="middle"
-                  fill="white" font-size="20" font-weight="700">
-                  {{ globalScore }}%
-                </text>
-                <text x="60" y="72" text-anchor="middle"
-                  fill="rgba(255,255,255,0.6)" font-size="9">
-                  Score global
-                </text>
-              </svg>
-            </div>
-            <div class="prog-legend">
-              <div v-for="skill in skillsList" :key="skill.key" class="prog-legend-item">
-                <span class="prog-dot" :style="{ background: skill.color }"></span>
-                <span>{{ skill.label }}: {{ player.skills[skill.key] || 0 }}/100</span>
+              <div class="enigme-stats">
+                <div><span>Status</span><span>{{ enigme.status === 'RÉUSSI' ? 'Complété' : '--' }}</span></div>
+                <div><span>Temps passé</span><span>{{ enigme.time ? enigme.time.toFixed(1) + ' min' : '--' }}</span></div>
+                <div><span>Score</span><span>{{ enigme.status === 'RÉUSSI' ? '100/100' : '--' }}</span></div>
               </div>
             </div>
           </div>
@@ -208,14 +126,10 @@
       </div>
     </template>
 
-    <!-- Error / no encontrado -->
     <div v-else class="not-found">
       <p>Joueur introuvable.</p>
-      <button @click="$router.push('/admin/joueurs')" class="btn-back">
-        Retour à la liste
-      </button>
+      <button @click="$router.push('/admin/joueurs')" class="btn-back">Retour à la liste</button>
     </div>
-
   </div>
 </template>
 
@@ -230,22 +144,9 @@ const playerId = route.params.id
 
 const loading = ref(true)
 const player = ref(null)
+const totalLevels = ref(5) // Ajusta esto si tienes más de 5 enigmas en total
 
-const skillsList = [
-  { key: 'RAPIDITE',     label: 'Rapidité',     color: '#22d3ee' },
-  { key: 'PRECISION',    label: 'Précision',    color: '#a855f7' },
-  { key: 'LOGIQUE',      label: 'Logique',      color: '#4ade80' },
-  { key: 'CREATIVITE',   label: 'Créativité',   color: '#f472b6' },
-  { key: 'PERSEVERANCE', label: 'Persévérance', color: '#fb923c' }
-]
-
-const COLORS = ['#f472b6', '#c084fc', '#d946ef', '#a855f7', '#818cf8']
-
-const avatarColor = computed(() => {
-  if (!player.value) return '#a855f7'
-  return COLORS[(parseInt(playerId) || 0) % COLORS.length]
-})
-
+// Iniciales del jugador
 const playerInitials = computed(() => {
   if (!player.value) return '??'
   const parts = (player.value.playerName || '').split(' ')
@@ -254,36 +155,20 @@ const playerInitials = computed(() => {
     : (parts[0]?.[0] || '?').toUpperCase()
 })
 
+// ✅ NUEVO CALCULO DE SCORE GLOBAL: Basado puramente en avance de niveles
 const globalScore = computed(() => {
-  if (!player.value?.skills) return 0
-  const vals = Object.values(player.value.skills)
-  if (!vals.length) return 0
-  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
+  if (!player.value) return 0
+  return Math.round((player.value.puzzlesResolved / totalLevels.value) * 100)
 })
 
-const bestSkill = computed(() => {
-  if (!player.value?.skills) return skillsList[0]
-  let best = skillsList[0]
-  skillsList.forEach(s => {
-    if ((player.value.skills[s.key] || 0) > (player.value.skills[best.key] || 0)) {
-      best = s
-    }
-  })
-  return best
+// Eje Y Dinámico para barras
+const maxEnigmaTime = computed(() => {
+  if (!player.value?.enigmaTimes || player.value.enigmaTimes.length === 0) return 20;
+  const max = Math.max(...player.value.enigmaTimes.map(e => e.avgTime));
+  return max > 0 ? Math.ceil(max / 5) * 5 : 20; 
 })
 
-const worstSkill = computed(() => {
-  if (!player.value?.skills) return skillsList[skillsList.length - 1]
-  let worst = skillsList[0]
-  skillsList.forEach(s => {
-    if ((player.value.skills[s.key] || 0) < (player.value.skills[worst.key] || 0)) {
-      worst = s
-    }
-  })
-  return worst
-})
-
-// Radar chart: 5 ejes en orden RAPIDITE, PRECISION, LOGIQUE, CREATIVITE, PERSEVERANCE
+// Lógica de Radar
 const CENTER = { x: 50, y: 50 }
 const MAX_R = 38
 const ANGLES_DEG = [-90, -18, 54, 126, 198]
@@ -301,14 +186,40 @@ const radarVertices = computed(() => {
     }
   })
 })
-
 const radarPoints = computed(() => {
   return radarVertices.value.map(v => `${v.x},${v.y}`).join(' ')
 })
 
+// ✅ Lógica Dinámica para mostrar el estatus real de cada enigma al Admin
+const computedEnigmasList = computed(() => {
+  if (!player.value) return [];
+  // Aquí pones los nombres exactos de tus 5 enigmas como están en la BD
+  const standardEnigmas = ['Salle Réseau', 'Bureau Médecin', 'Chambre du Patient', 'Pharmacie', 'Salle de Réunion'];
+  
+  return standardEnigmas.map((name, index) => {
+    // Buscamos si el jugador resolvió este enigma
+    const found = player.value.enigmaTimes?.find(e => e.nom === name);
+    
+    let status = 'VERROUILLÉ';
+    if (found) {
+        status = 'RÉUSSI';
+    } else if (index === 0 || (index > 0 && player.value.enigmaTimes?.find(e => e.nom === standardEnigmas[index - 1]))) {
+        // Se desbloquea si es el primero o si el anterior está completado
+        status = 'COMMENCER';
+    }
+
+    return {
+      id: index + 1,
+      nom: name,
+      status: status,
+      time: found ? found.avgTime : null
+    };
+  });
+})
+
 onMounted(async () => {
   try {
-    const data = await adminService.getPlayerStats(playerId)
+    const data = await adminService.getPlayerDetails(playerId)
     player.value = data
   } catch (err) {
     console.error('Erreur détail joueur:', err)
@@ -323,196 +234,81 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.admin-layout {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem 2rem 4rem 2rem;
-  display: flex;
-  flex-direction: column;
-  color: white;
-  min-height: 100vh;
-}
-.admin-header { padding: 0.5rem 0 1.5rem 0; }
-.btn-back {
-  background: transparent;
-  border: none;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-  opacity: 0.8;
-  transition: opacity 0.2s;
-}
+.admin-layout { width: 100%; max-width: 1200px; margin: 0 auto; padding: 1rem 2rem 4rem 2rem; display: flex; flex-direction: column; color: white; min-height: 100vh; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 1rem 0; }
+.btn-back { background: transparent; border: none; color: white; display: flex; align-items: center; gap: 0.5rem; font-family: inherit; font-size: 0.9rem; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; }
 .btn-back:hover { opacity: 1; }
 
-.loading-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 3rem 0;
-  color: rgba(255,255,255,0.6);
-}
-.spinner {
-  width: 28px; height: 28px;
-  border: 2px solid rgba(255,255,255,0.15);
-  border-top-color: #a855f7;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+.badge-admin { background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #d8b4fe; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
 
-.glass-panel {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-}
+.glass-panel { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; }
 
-/* Banner perfil */
-.profile-banner {
-  padding: 1.5rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
+/* Banner Profile */
+.profile-banner { padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .profile-left { display: flex; align-items: center; gap: 1.5rem; }
-.avatar {
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  display: flex; justify-content: center; align-items: center;
-  font-size: 1.5rem; font-weight: 700;
-  color: white;
-  flex-shrink: 0;
-}
+.avatar { width: 72px; height: 72px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: 700; color: white; }
+.bg-pink { background: #d946ef; }
+.capitalize-name { text-transform: capitalize; }
 .profile-meta h2 { font-size: 1.8rem; font-weight: 700; margin: 0 0 0.5rem 0; }
-.meta-stats { display: flex; gap: 1.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+.meta-stats { display: flex; gap: 1.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.7); flex-wrap: wrap; }
 .meta-stats span { display: flex; align-items: center; gap: 0.4rem; }
+.meta-stats svg { margin-top: -1px; }
 
-.success-box {
-  background: rgba(250,204,21,0.1);
-  border: 1px solid rgba(250,204,21,0.2);
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-}
-.rate-val { font-size: 2rem; font-weight: 700; color: white; }
+.profile-right { display: flex; align-items: center; }
+.success-box { background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.2); padding: 1rem 2rem; border-radius: 12px; display: flex; flex-direction: column; align-items: center; }
+.color-cyan { color: #22d3ee !important; }
+.rate-val { font-size: 2rem; font-weight: 700; color: white; margin-top: 0.2rem; }
 .rate-label { font-size: 0.75rem; color: rgba(255,255,255,0.7); }
 
-/* KPIs de skills */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-.kpi-card {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-.kpi-label { display: block; font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-bottom: 0.2rem; }
-.kpi-value { display: block; font-size: 1.6rem; font-weight: 700; }
-.skill-bar-container { display: flex; align-items: center; gap: 0.5rem; }
-.skill-bar-bg {
-  flex: 1; height: 5px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.skill-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 1s ease;
-}
-.skill-pct { font-size: 0.65rem; color: rgba(255,255,255,0.5); white-space: nowrap; }
+/* KPIs */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+.kpi-card { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+.kpi-label { display: block; font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 0.25rem; }
+.kpi-value { display: block; font-size: 1.5rem; font-weight: 700; }
+.kpi-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; justify-content: center; align-items: center; }
+.bg-blue { background: #0ea5e9; } .bg-pink { background: #d946ef; } .bg-green { background: #22c55e; } .bg-orange { background: #f97316; }
 
 /* Charts */
 .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-.chart-card {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-}
+.chart-card { padding: 1.5rem; display: flex; flex-direction: column; }
 .chart-card h4 { font-size: 0.95rem; font-weight: 600; margin: 0 0 1.5rem 0; color: white; }
 
+.chart-container { flex: 1; display: flex; position: relative; min-height: 220px; }
+.y-axis { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 1rem; color: rgba(255, 255, 255, 0.5); font-size: 0.7rem; border-right: 1px dashed rgba(255, 255, 255, 0.2); }
+
+/* Bars */
+.bar-area { flex: 1; display: flex; justify-content: space-around; align-items: flex-end; padding-left: 1rem; position: relative; }
+.bar-area::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.2); }
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; height: 100%; justify-content: flex-end; flex: 1; margin: 0 4px; }
+.bar { width: 100%; max-width: 40px; border-radius: 4px 4px 0 0; }
+.text-truncate { font-size: 0.65rem; color: rgba(255, 255, 255, 0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50px;}
+
 /* Radar */
-.radar-container { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 240px; }
-.radar-chart { width: 100%; max-width: 260px; height: auto; overflow: visible; }
+.radar-container { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 220px;}
+.radar-chart { width: 100%; max-width: 250px; height: auto; overflow: visible; }
 
-/* Skills detail */
-.skills-detail-list { display: flex; flex-direction: column; gap: 1rem; flex: 1; }
-.skill-detail-row { display: flex; align-items: center; gap: 0.75rem; }
-.skill-detail-label { font-size: 0.82rem; color: rgba(255,255,255,0.8); width: 100px; flex-shrink: 0; }
-.skill-detail-bar-bg {
-  flex: 1; height: 8px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 4px;
-  overflow: hidden;
-}
-.skill-detail-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 1s ease;
-  min-width: 4px;
-}
-.skill-detail-val { font-size: 0.78rem; font-weight: 600; width: 30px; text-align: right; }
+/* Enigme List */
+.enigme-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.enigme-item { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 1rem; border: 1px solid rgba(255,255,255,0.05); }
+.enigme-item.locked { opacity: 0.5; }
+.enigme-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.enigme-meta strong { font-size: 0.9rem; }
+.status-success { font-size: 0.7rem; color: #4ade80; font-weight: 600; }
+.status-locked { font-size: 0.7rem; color: rgba(255,255,255,0.5); font-weight: 600; }
+.status-start { font-size: 0.7rem; color: #2dd4bf; font-weight: 600; }
+.enigme-stats { display: flex; justify-content: space-between; }
+.enigme-stats div { display: flex; flex-direction: column; gap: 0.2rem; }
+.enigme-stats div span:first-child { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+.enigme-stats div span:last-child { font-size: 0.8rem; font-weight: 600; }
 
-/* Info list */
-.info-list { display: flex; flex-direction: column; gap: 0; flex: 1; }
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.info-row:last-child { border-bottom: none; }
-.info-label { font-size: 0.8rem; color: rgba(255,255,255,0.55); }
-.info-val { font-size: 0.85rem; font-weight: 500; color: white; }
-.score-val { color: #a855f7; font-weight: 700; }
-.warn-val { color: #fb923c; }
+.loading-row { display: flex; align-items: center; gap: 1rem; padding: 3rem 0; color: rgba(255,255,255,0.6); }
+.spinner { width: 28px; height: 28px; border: 2px solid rgba(255,255,255,0.15); border-top-color: #a855f7; border-radius: 50%; animation: spin 0.7s linear infinite; }
+.not-found { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; padding: 5rem 0; color: rgba(255,255,255,0.5); }
 
-/* Círculo de progresión */
-.progression-visual {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  justify-content: center;
-}
-.prog-circle-wrapper { flex-shrink: 0; }
-.prog-svg { width: 140px; height: 140px; }
-.prog-legend { display: flex; flex-direction: column; gap: 0.6rem; }
-.prog-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: rgba(255,255,255,0.75); }
-.prog-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-.not-found {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 5rem 0;
-  color: rgba(255,255,255,0.5);
-}
-
-@media (max-width: 1100px) {
-  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 900px) {
   .charts-grid { grid-template-columns: 1fr; }
-  .progression-visual { flex-direction: column; }
-}
-@media (max-width: 700px) {
-  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .enigme-list { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .profile-banner { flex-direction: column; gap: 1rem; align-items: flex-start; }
 }
 </style>

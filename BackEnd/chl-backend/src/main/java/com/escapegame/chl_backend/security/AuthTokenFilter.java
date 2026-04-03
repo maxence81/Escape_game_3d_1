@@ -2,10 +2,13 @@ package com.escapegame.chl_backend.security;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -18,50 +21,42 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
-
     @Autowired
     private JwtUtils jwtUtils;
 
     @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    private UserDetailsService userDetailsService;
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            // 1. Obtener el token de la cabecera
             String jwt = parseJwt(request);
-
-            // 2. Validar el token
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                
-                // 3. Obtener el usuario (email) del token
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
-                // 4. Cargar los detalles completos del usuario desde la BD
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                // 5. Crear objeto de autenticación
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
                                 userDetails.getAuthorities());
-                
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // 6. Establecer la autenticación en el contexto de seguridad actual
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            logger.error("No se pudo establecer la autenticación del usuario: {}", e);
+            // ✅ CLAVE AQUÍ: Solo hacemos log. NO lanzamos excepción.
+            // Si lanzas excepción aquí, Spring devolverá un 403 antes de llegar al AuthController.
+            logger.error("No se pudo establecer la autenticación del usuario: {}", e.getMessage());
         }
 
-        // Continuar con la cadena de filtros
+        // Esta línea DEBE ejecutarse siempre
         filterChain.doFilter(request, response);
     }
 
-    // Método auxiliar para limpiar el prefijo "Bearer "
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
 

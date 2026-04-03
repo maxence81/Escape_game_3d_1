@@ -29,13 +29,11 @@
       </button>
     </div>
 
-    <!-- Loading -->
     <div v-if="loading" class="loading-row">
       <div class="spinner"></div>
       <span>Chargement des statistiques...</span>
     </div>
 
-    <!-- KPIs -->
     <div v-else class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-info">
@@ -56,7 +54,7 @@
       <div class="kpi-card">
         <div class="kpi-info">
           <span class="kpi-label">Temps Moyen</span>
-          <span class="kpi-value">{{ stats.averageTimeMinutes.toFixed(1) }} min</span>
+          <span class="kpi-value">{{ hasData ? stats.averageTimeMinutes.toFixed(1) + ' min' : '--' }}</span>
         </div>
         <div class="kpi-icon bg-pink">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
@@ -70,7 +68,7 @@
       <div class="kpi-card">
         <div class="kpi-info">
           <span class="kpi-label">Taux de Réussite</span>
-          <span class="kpi-value">{{ Math.round(stats.successRate) }}%</span>
+          <span class="kpi-value">{{ hasData ? Math.round(stats.successRate) + '%' : '--' }}</span>
         </div>
         <div class="kpi-icon bg-green">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
@@ -97,7 +95,6 @@
       </div>
     </div>
 
-    <!-- Banner -->
     <button @click="$router.push('/admin/joueurs')" class="action-banner glass-panel">
       <div class="banner-icon bg-blue">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
@@ -119,20 +116,30 @@
       </div>
     </button>
 
-    <!-- Charts Grid -->
     <div v-if="!loading" class="charts-grid">
 
-      <!-- Chart 1: Barras por enigma -->
       <div class="chart-card glass-panel">
         <h4>Temps Moyen par Énigme (minutes)</h4>
         <div class="chart-container flex-end bar-chart">
+          
           <div class="y-axis">
-            <span>30</span><span>20</span><span>10</span><span>0</span>
+            <span>{{ maxEnigmaTime }}</span>
+            <span>{{ Math.round(maxEnigmaTime * 0.66) }}</span>
+            <span>{{ Math.round(maxEnigmaTime * 0.33) }}</span>
+            <span>0</span>
           </div>
+          
           <div class="bar-area">
+            <div v-if="!hasData" class="empty-state" style="width: 100%; text-align: center; margin-bottom: 2rem;">
+              Aucune donnée d'énigme disponible
+            </div>
+            
             <div v-for="(enigma, i) in enigmaStats" :key="i" class="bar-col">
               <div class="bar"
-                :style="{ height: (enigma.avgTime / 30 * 100) + '%', background: enigmaColors[i] }">
+                :style="{ 
+                  height: (enigma.avgTime / maxEnigmaTime * 100) + '%', 
+                  background: enigmaColors[i % enigmaColors.length] 
+                }">
               </div>
               <span>{{ enigma.nom }}</span>
             </div>
@@ -140,14 +147,14 @@
         </div>
       </div>
 
-      <!-- Chart 2: Distribución por tasa de éxito -->
       <div class="chart-card glass-panel">
         <h4>Distribution du Taux de Réussite</h4>
         <div class="chart-container flex-end bar-chart">
           <div class="y-axis">
             <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
           </div>
-          <div class="bar-area narrow-gap">
+          
+          <div v-if="hasData" class="bar-area narrow-gap">
             <div class="bar-col">
               <div class="bar bg-green-solid"
                 :style="{ height: stats.successRate + '%' }"></div>
@@ -159,13 +166,18 @@
               <span>Échec</span>
             </div>
           </div>
+
+          <div v-else class="empty-state" style="width: 100%; text-align: center; align-self: center;">
+            Aucune donnée
+          </div>
+
         </div>
       </div>
 
-      <!-- Chart 3: Pie -->
       <div class="chart-card glass-panel">
         <h4>Taux de Réussite Global</h4>
-        <div class="pie-container">
+        
+        <div v-if="hasData" class="pie-container">
           <div class="pie-chart"
             :style="{ background: 'conic-gradient(#4ade80 0% ' + stats.successRate + '%, #f87171 ' + stats.successRate + '% 100%)' }">
           </div>
@@ -174,9 +186,13 @@
             <span class="label-fail">Échec: {{ Math.round(100 - stats.successRate) }}%</span>
           </div>
         </div>
+
+        <div v-else class="pie-container">
+          <div class="pie-chart" style="background: rgba(255, 255, 255, 0.05); box-shadow: none;"></div>
+          <div class="empty-state" style="position: absolute;">Aucune donnée</div>
+        </div>
       </div>
 
-      <!-- Chart 4: Top jugadores -->
       <div class="chart-card glass-panel">
         <h4>Derniers Joueurs Inscrits</h4>
         <div class="player-mini-list">
@@ -202,9 +218,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { adminService, authService } from '../services/api'
+import { adminService, authService } from '../services/api' 
 
 const router = useRouter()
 const loading = ref(true)
@@ -216,17 +232,13 @@ const stats = ref({
 })
 
 const recentPlayers = ref([])
+const enigmaStats = ref([]) 
+const maxEnigmaTime = ref(30) 
 
-const enigmaStats = ref([
-  { nom: 'Énigme 1', avgTime: 12 },
-  { nom: 'Énigme 2', avgTime: 18 },
-  { nom: 'Énigme 3', avgTime: 22 },
-  { nom: 'Énigme 4', avgTime: 15 },
-  { nom: 'Énigme 5', avgTime: 28 }
-])
+// ✅ Propiedad computada que verifica si realmente hay algún registro de juego
+const hasData = computed(() => enigmaStats.value.length > 0)
 
 const enigmaColors = ['#8b5cf6', '#9333ea', '#a855f7', '#c084fc', '#d8b4fe']
-
 const COLORS = ['#f472b6', '#c084fc', '#d946ef', '#a855f7', '#818cf8']
 
 function getInitials(prenom, nom) {
@@ -236,18 +248,26 @@ function getInitials(prenom, nom) {
 onMounted(async () => {
   try {
     const [statsData, playersData] = await Promise.all([
-      adminService.getDashboardStats(),
+      adminService.getGlobalStats(), 
       adminService.getAllPlayers()
     ])
 
     stats.value = {
-      totalPlayers: statsData.totalPlayers,
+      totalPlayers: statsData.totalPlayers || 0,
       averageTimeMinutes: statsData.averageTimeMinutes || 0,
       successRate: statsData.successRate || 0
     }
 
+    if (statsData.enigmaStats && statsData.enigmaStats.length > 0) {
+      enigmaStats.value = statsData.enigmaStats;
+      const maxTime = Math.max(...enigmaStats.value.map(e => e.avgTime || 0));
+      maxEnigmaTime.value = maxTime > 0 ? Math.ceil(maxTime / 10) * 10 : 30; 
+    } else {
+      enigmaStats.value = [];
+    }
+
     recentPlayers.value = playersData.slice(0, 5).map((p, i) => ({
-      id: p.id_utilisateur,
+      id: p.id, // Recordando el cambio de ID
       name: `${p.prenom || ''} ${p.nom || ''}`.trim(),
       email: p.email,
       initials: getInitials(p.prenom, p.nom),

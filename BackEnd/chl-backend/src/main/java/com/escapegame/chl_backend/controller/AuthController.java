@@ -7,8 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PostMapping; // Quitamos CrossOrigin
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +23,7 @@ import com.escapegame.chl_backend.service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+// ❌ Eliminado: @CrossOrigin(origins = "*") - Estaba rompiendo el CORS global
 public class AuthController {
 
     @Autowired
@@ -53,10 +52,9 @@ public class AuthController {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // AQUÍ ESTABA EL ERROR OCULTO:
         return ResponseEntity.ok(new JwtResponse(
             jwt,
-            user.getId(), // <-- CAMBIO: de getId_utilisateur() a getId()
+            user.getId(), 
             userDetails.getUsername(),
             role
         ));

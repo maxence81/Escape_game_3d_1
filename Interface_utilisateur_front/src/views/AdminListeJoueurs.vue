@@ -152,7 +152,7 @@ onMounted(async () => {
   try {
     const data = await adminService.getAllPlayers()
     allPlayers.value = data.map((p, i) => ({
-      id: p.id_utilisateur,
+      id: p.id,
       initials: getInitials(p.prenom, p.nom),
       name: `${p.prenom || ''} ${p.nom || ''}`.trim() || p.email,
       pseudo: p.pseudo || '—',

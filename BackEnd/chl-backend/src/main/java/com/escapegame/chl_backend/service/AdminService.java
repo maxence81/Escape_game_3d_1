@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.escapegame.chl_backend.dto.response.AdminDashboardStatsDTO;
+import com.escapegame.chl_backend.dto.response.EnigmaStatDTO;
 import com.escapegame.chl_backend.dto.response.PlayerDetailDTO;
 import com.escapegame.chl_backend.model.GameSession;
 import com.escapegame.chl_backend.model.Player;
@@ -67,6 +68,31 @@ public class AdminService {
             stats.setSuccessRate(0);
         }
 
+        // ==========================================================
+        // ✅ NUEVO: Calcular el tiempo promedio por enigma
+        // ==========================================================
+        if (!allAttempts.isEmpty()) {
+            // Agrupamos los intentos por el nombre del enigma y promediamos el tiempo
+            Map<String, Double> enigmaAverageTimes = allAttempts.stream()
+                .filter(a -> a.getEnigma() != null && a.getEnigma().getNom() != null)
+                .filter(a -> a.getTempsPasseSec() != null) // Usando tu getter real
+                .collect(Collectors.groupingBy(
+                    a -> a.getEnigma().getNom(),
+                    Collectors.averagingInt(PuzzleAttempt::getTempsPasseSec) // Usando tu getter real
+                ));
+
+            // Convertimos el mapa a la lista DTO que espera Vue
+            List<EnigmaStatDTO> enigmaStatsList = enigmaAverageTimes.entrySet().stream()
+                // Dividimos entre 60.0 porque en BD está en segundos (tempsPasseSec)
+                .map(entry -> new EnigmaStatDTO(entry.getKey(), entry.getValue() / 60.0))
+                .collect(Collectors.toList());
+
+            stats.setEnigmaStats(enigmaStatsList);
+        } else {
+            stats.setEnigmaStats(new ArrayList<>());
+        }
+        // ==========================================================
+
         return stats;
     }
 
@@ -88,26 +114,42 @@ public class AdminService {
         detail.setPlayerName(player.getPrenom() + " " + player.getNom());
         detail.setEmail(player.getEmail());
 
-        // Recuperar todos los intentos del jugador
+        // Recuperar sesiones e intentos
         List<GameSession> sessions = gameSessionRepository.findByPlayer(player);
         List<PuzzleAttempt> attempts = new ArrayList<>();
+        
+        int totalTimeSec = 0;
         for (GameSession session : sessions) {
+            if (session.getTempsEnLigne() != null) {
+                totalTimeSec += session.getTempsEnLigne();
+            }
             attempts.addAll(puzzleAttemptRepository.findBySession(session));
         }
+        
+        // 1. Asignar Tiempo Total
+        detail.setTotalTimeMinutes(totalTimeSec / 60);
 
-        // Inicializar todas las competencias a 50 (valor neutro)
+        // 2. Calcular enigmas únicos resueltos y total de errores
+        long resolvedUnique = attempts.stream()
+                .filter(a -> Boolean.TRUE.equals(a.getEstReussi()) && a.getEnigma() != null)
+                .map(a -> a.getEnigma().getId_enigme())
+                .distinct()
+                .count();
+        detail.setPuzzlesResolved((int) resolvedUnique);
+
+        long totalErrors = attempts.stream()
+                .filter(a -> Boolean.FALSE.equals(a.getEstReussi()))
+                .count();
+        detail.setTotalErrors((int) totalErrors);
+
+        // 3. Calcular los Skills (Radar)
         Map<String, Integer> skills = new HashMap<>();
         for (SkillType skill : SkillType.values()) {
-            skills.put(skill.name(), 50);
+            skills.put(skill.name(), 50); // Valor base
         }
 
-        // Ajustar según los intentos: +10 si correcto, -5 si incorrecto
         for (PuzzleAttempt attempt : attempts) {
-            // Verificación de nulos para evitar NullPointerException
-            if (attempt.getEnigma() == null) continue;
-            if (attempt.getEnigma().getCompetence() == null) continue;
-            if (attempt.getEstReussi() == null) continue;
-
+            if (attempt.getEnigma() == null || attempt.getEnigma().getCompetence() == null || attempt.getEstReussi() == null) continue;
             String skillName = attempt.getEnigma().getCompetence().name();
             int currentScore = skills.getOrDefault(skillName, 50);
 
@@ -117,8 +159,27 @@ public class AdminService {
                 skills.put(skillName, Math.max(0, currentScore - 5));
             }
         }
-
         detail.setSkills(skills);
+
+        // 4. Calcular el tiempo promedio por enigma para la gráfica de barras
+        if (!attempts.isEmpty()) {
+            Map<String, Double> enigmaAverageTimes = attempts.stream()
+                .filter(a -> a.getEnigma() != null && a.getEnigma().getNom() != null)
+                .filter(a -> a.getTempsPasseSec() != null)
+                .collect(Collectors.groupingBy(
+                    a -> a.getEnigma().getNom(),
+                    Collectors.averagingInt(PuzzleAttempt::getTempsPasseSec)
+                ));
+
+            List<EnigmaStatDTO> enigmaStatsList = enigmaAverageTimes.entrySet().stream()
+                .map(entry -> new EnigmaStatDTO(entry.getKey(), entry.getValue() / 60.0))
+                .collect(Collectors.toList());
+
+            detail.setEnigmaTimes(enigmaStatsList);
+        } else {
+            detail.setEnigmaTimes(new ArrayList<>());
+        }
+
         return detail;
     }
 }

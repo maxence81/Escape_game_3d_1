@@ -7,6 +7,13 @@
 INSERT INTO enigmas (nom, description, reponse_attendue, difficulte, competence)
 VALUES 
   (
+    'Salle Réseau',
+    'Résolvez l''énigme réseau pour accéder aux fichiers secrets du serveur et découvrir la vérité sur Mme Calvin.',
+    'SUCCESS',
+    'Difficile',
+    'RAPIDITE'
+  ),
+  (
     'Bureau Médecin',
     'Déchiffrez le dossier médical du Dr Deckard pour trouver le diagnostic du patient et accéder aux fichiers secrets.',
     'SUCCESS',
@@ -26,13 +33,6 @@ VALUES
     'SUCCESS',
     'Moyen',
     'CREATIVITE'
-  ),
-  (
-    'Salle Réseau',
-    'Résolvez l''énigme réseau pour accéder aux fichiers secrets du serveur et découvrir la vérité sur Mme Calvin.',
-    'SUCCESS',
-    'Difficile',
-    'RAPIDITE'
   ),
   (
     'Salle de Réunion',

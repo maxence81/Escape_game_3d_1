@@ -2,6 +2,7 @@ package com.escapegame.chl_backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // Importante añadir esto
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -38,14 +39,8 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        // --- CAMBIO CLAVE AQUÍ PARA VERSIÓN 7.0.2 ---
-        // El constructor ahora OBLIGA a recibir userDetailsService.
-        // Ya no existe el constructor vacío new DaoAuthenticationProvider().
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-        
-        // El PasswordEncoder se sigue configurando con setter (o puede que también en constructor, pero setter es seguro)
         authProvider.setPasswordEncoder(passwordEncoder());
-        
         return authProvider;
     }
 
@@ -58,9 +53,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(Customizer.withDefaults())
+            .cors(Customizer.withDefaults()) // Utiliza la configuración de CorsConfig.java
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // ✅ CLAVE AQUÍ: Permitir todas las peticiones OPTIONS (Preflight de CORS)
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
+                
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/images/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
