@@ -13,4 +13,5 @@ public class RegisterRequest {
     private String pseudo;
     private String etablissement;
     private LocalDate dateNaissance;
+    private String profil;
 }

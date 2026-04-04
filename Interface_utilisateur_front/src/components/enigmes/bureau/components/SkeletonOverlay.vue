@@ -84,7 +84,7 @@ function validateAnswers() {
     startConfetti()
 
     // ✅ Notifier le dashboard parent
-    notifyEnigmaCompleted(true)
+    notifyEnigmaCompleted(true, 2)
   }
 }
 

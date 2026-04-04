@@ -60,7 +60,6 @@ public class GameService {
                 .findFirstByPlayerAndDateFinIsNullOrderByDateDebutDesc((Player) user)
                 .orElseThrow(() -> new RuntimeException("Aucune session active trouvée."));
 
-        // Recuperar puzzleId y answer directamente desde los campos del DTO
         String puzzleIdStr = request.getPuzzleId();
         String answer = request.getAnswer();
 
@@ -81,24 +80,24 @@ public class GameService {
         } else if ("FAIL".equalsIgnoreCase(answer)) {
             isCorrect = false;
         } else {
-            // Comparación con la respuesta esperada del enigma
+            // Comparación con la respuesta esperada en la base de datos
             String reponseAttendue = enigma.getReponseAttendue();
-            isCorrect = reponseAttendue != null && reponseAttendue.equalsIgnoreCase(answer);
+            isCorrect = reponseAttendue != null && reponseAttendue.equalsIgnoreCase(answer.trim());
         }
 
-        // Calcular tiempo pasado desde el inicio de la sesión
-        int tempsPasseSec = (int) Duration.between(
-            session.getDateDebut(),
-            LocalDateTime.now()
-        ).getSeconds();
-
-        // Crear el intento — usar Integer.valueOf() para evitar autoboxing ambiguo
+        // Crear el intento en la base de datos
         PuzzleAttempt attempt = new PuzzleAttempt();
         attempt.setSession(session);
         attempt.setEnigma(enigma);
         attempt.setEstReussi(isCorrect);
         attempt.setScoreFinal(isCorrect ? 100 : 0);
-        attempt.setTempsPasseSec(tempsPasseSec);
+        
+        // ✅ CAMBIO CRÍTICO: El tiempo exacto del intento ahora viene del frontend
+        attempt.setTempsPasseSec(request.getTimeSpentSeconds());
+        
+        // ✅ NUEVO: Registramos cuántas pistas utilizó para este intento
+        attempt.setIndicesUtilises(request.getHintsUsed());
+        
         attemptRepository.save(attempt);
 
         return isCorrect;

@@ -5,6 +5,10 @@ public class PuzzleSubmissionDTO {
     private String puzzleId;
     private String answer;
 
+    // ✅ NUEVOS CAMPOS: El frontend enviará esta información
+    private int timeSpentSeconds; 
+    private int hintsUsed;
+
     public PuzzleSubmissionDTO() {}
 
     public String getPuzzleId() {
@@ -21,5 +25,21 @@ public class PuzzleSubmissionDTO {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public int getTimeSpentSeconds() {
+        return timeSpentSeconds;
+    }
+
+    public void setTimeSpentSeconds(int timeSpentSeconds) {
+        this.timeSpentSeconds = timeSpentSeconds;
+    }
+
+    public int getHintsUsed() {
+        return hintsUsed;
+    }
+
+    public void setHintsUsed(int hintsUsed) {
+        this.hintsUsed = hintsUsed;
     }
 }

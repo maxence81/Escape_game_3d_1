@@ -10,4 +10,6 @@ import lombok.NoArgsConstructor;
 public class EnigmaStatDTO {
     private String nom;
     private double avgTime; // Tiempo promedio en minutos
+    private int erreurs;
+    private int score;
 }

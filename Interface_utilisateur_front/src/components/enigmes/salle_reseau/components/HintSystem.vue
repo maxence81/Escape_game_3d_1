@@ -38,6 +38,7 @@ const hintCount = ref(0)
 const hintLimit = computed(() => props.hints.length)
 const limitReached = computed(() => hintCount.value >= hintLimit.value)
 const remaining = computed(() => hintLimit.value - hintCount.value)
+const currentHints = parseInt(localStorage.getItem('currentEnigmaHints') || '0');
 
 const toastMessage = ref('')
 const toastVisible = ref(false)
@@ -49,6 +50,7 @@ function getHint() {
     toastMessage.value = hint
     emit('hint-shown', hint)
     hintCount.value++
+    localStorage.setItem('currentEnigmaHints', currentHints + 1);
   } else {
     toastMessage.value = "Plus d'indices disponibles !"
   }

@@ -116,8 +116,10 @@
               </div>
               <div class="enigme-stats">
                 <div><span>Status</span><span>{{ enigme.status === 'RÉUSSI' ? 'Complété' : '--' }}</span></div>
-                <div><span>Temps passé</span><span>{{ enigme.time ? enigme.time.toFixed(1) + ' min' : '--' }}</span></div>
-                <div><span>Score</span><span>{{ enigme.status === 'RÉUSSI' ? '100/100' : '--' }}</span></div>
+                
+                <div><span>Erreurs</span><span :style="{ color: enigme.erreurs > 0 ? '#f87171' : 'inherit' }">{{ enigme.status === 'RÉUSSI' ? enigme.erreurs : '--' }}</span></div>
+                
+                <div><span>Score</span><span class="color-cyan">{{ enigme.status === 'RÉUSSI' ? enigme.score + '/100' : '--' }}</span></div>
               </div>
             </div>
           </div>
@@ -157,8 +159,19 @@ const playerInitials = computed(() => {
 
 // ✅ NUEVO CALCULO DE SCORE GLOBAL: Basado puramente en avance de niveles
 const globalScore = computed(() => {
-  if (!player.value) return 0
-  return Math.round((player.value.puzzlesResolved / totalLevels.value) * 100)
+  const list = computedEnigmasList.value;
+  
+  // 1. Filtramos para tomar en cuenta SOLO los enigmas que ya pasó
+  const enigmasJoues = list.filter(enigma => enigma.status === 'RÉUSSI');
+  
+  // Si no ha completado ninguno todavía, su score es 0
+  if (enigmasJoues.length === 0) return 0;
+  
+  // 2. Sumamos los scores individuales de las salas completadas
+  const totalScores = enigmasJoues.reduce((sum, enigma) => sum + enigma.score, 0);
+  
+  // 3. Dividimos entre la cantidad de salas que REALMENTE ha jugado
+  return Math.round(totalScores / enigmasJoues.length); 
 })
 
 // Eje Y Dinámico para barras
@@ -192,19 +205,19 @@ const radarPoints = computed(() => {
 
 // ✅ Lógica Dinámica para mostrar el estatus real de cada enigma al Admin
 const computedEnigmasList = computed(() => {
-  if (!player.value) return [];
-  // Aquí pones los nombres exactos de tus 5 enigmas como están en la BD
+  // ¡AQUÍ ESTÁ LA MAGIA! Usamos player.value en lugar de stats.value
+  const targetData = player.value; 
+  if (!targetData) return [];
+  
   const standardEnigmas = ['Salle Réseau', 'Bureau Médecin', 'Chambre du Patient', 'Pharmacie', 'Salle de Réunion'];
   
   return standardEnigmas.map((name, index) => {
-    // Buscamos si el jugador resolvió este enigma
-    const found = player.value.enigmaTimes?.find(e => e.nom === name);
+    const found = targetData.enigmaTimes?.find(e => e.nom === name);
     
     let status = 'VERROUILLÉ';
     if (found) {
         status = 'RÉUSSI';
-    } else if (index === 0 || (index > 0 && player.value.enigmaTimes?.find(e => e.nom === standardEnigmas[index - 1]))) {
-        // Se desbloquea si es el primero o si el anterior está completado
+    } else if (index === 0 || (index > 0 && targetData.enigmaTimes?.find(e => e.nom === standardEnigmas[index - 1]))) {
         status = 'COMMENCER';
     }
 
@@ -212,7 +225,9 @@ const computedEnigmasList = computed(() => {
       id: index + 1,
       nom: name,
       status: status,
-      time: found ? found.avgTime : null
+      time: found ? found.avgTime : null,
+      erreurs: found ? found.erreurs : 0,  
+      score: found ? found.score : 0       
     };
   });
 })

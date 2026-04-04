@@ -257,8 +257,8 @@ function submitAnswers() {
     gameCompleted.value = true
     isComputerUIOpen.value = false // Fermer automatiquement l'ordinateur
 
-    // ✅ Notifier le dashboard parent — succès enigme 3
-    notifyEnigmaCompleted(true, 3)
+    // ✅ Notifier le dashboard parent — succès enigme 4
+    notifyEnigmaCompleted(true, 4)
   } else {
     const wrong = []
     if (!q1ok) wrong.push('1')

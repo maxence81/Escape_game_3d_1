@@ -1,5 +1,6 @@
 package com.escapegame.chl_backend.model;
 
+import jakarta.persistence.Column; // ✅ Importante añadir esta importación
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,6 +28,10 @@ public class PuzzleAttempt {
     private Integer tempsPasseSec;
     private Integer scoreFinal;
     private Boolean estReussi;
+
+    // ✅ NUEVO: Campo para guardar las pistas utilizadas
+    @Column(name = "indices_utilises", nullable = false)
+    private int indicesUtilises = 0;
 
     public PuzzleAttempt() {}
 
@@ -56,6 +61,11 @@ public class PuzzleAttempt {
         return estReussi;
     }
 
+    // ✅ NUEVO GETTER
+    public int getIndicesUtilises() {
+        return indicesUtilises;
+    }
+
     // --- Setters ---
 
     public void setId_tentative(Long id_tentative) {
@@ -80,5 +90,10 @@ public class PuzzleAttempt {
 
     public void setEstReussi(Boolean estReussi) {
         this.estReussi = estReussi;
+    }
+
+    // ✅ NUEVO SETTER
+    public void setIndicesUtilises(int indicesUtilises) {
+        this.indicesUtilises = indicesUtilises;
     }
 }

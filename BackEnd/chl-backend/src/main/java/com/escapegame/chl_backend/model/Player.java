@@ -2,6 +2,7 @@ package com.escapegame.chl_backend.model;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -24,4 +25,7 @@ public class Player extends User {
     
     // Fecha en la que creó la cuenta (Para el mockup de la tabla de usuarios)
     private LocalDate dateInscription;
+
+    @Column(name = "profil") // Solo en Player.java
+    private String profil;
 }

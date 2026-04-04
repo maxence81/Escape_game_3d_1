@@ -16,4 +16,7 @@ public class AdminDashboardStatsDTO {
     
     // Opcional: Si quieres enviar datos para gráficos extra
     private Map<String, Integer> ageDistribution; 
+
+    private Map<String, Long> repartitionProfil;
+    private Map<String, Long> repartitionAge;
 }

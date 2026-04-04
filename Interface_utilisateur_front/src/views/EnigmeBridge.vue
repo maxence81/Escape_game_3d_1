@@ -107,31 +107,38 @@ const finalScore = computed(() => {
   return Math.max(0, Math.floor(1000 * ((600 - elapsedSeconds.value) / 600)))
 })
 
+// ✅ MODIFICADO: Extraer también hintsUsed del mensaje
 function handleMessage(event) {
-  const { type, enigmaId, success, timeSeconds } = event.data || {}
+  const { type, enigmaId, success, timeSeconds, hintsUsed } = event.data || {}
 
   if (type === 'ENIGMA_COMPLETED') {
     const id = enigmaId || props.enigmaId
     const time = timeSeconds || elapsedSeconds.value
-    handleEnigmaCompletion(id, success !== false, time)
+    // Pasar las pistas, o 0 si no vienen
+    const hints = hintsUsed || 0 
+    handleEnigmaCompletion(id, success !== false, time, hints)
   }
 }
 
-async function handleEnigmaCompletion(enigmaId, isSuccess, timeSeconds) {
+// ✅ MODIFICADO: Recibir hintsUsed y pasarlo al backend
+async function handleEnigmaCompletion(enigmaId, isSuccess, timeSeconds, hintsUsed) {
   clearInterval(timerInterval)
 
-  // Afficher le résultat immédiatement pour ne pas faire attendre le joueur
   if (isSuccess) {
     showSuccessModal.value = true
   } else {
-    // Note: Pour une meilleure UX, on pourrait afficher une modale d'échec ici
-    // au lieu d'un retour direct, mais on maintient la logique actuelle.
     goBack()
   }
 
   try {
-    // 1. Valider le puzzle côté backend
-    await gameService.validatePuzzle(enigmaId, isSuccess ? 'SUCCESS' : 'FAIL')
+    // 1. Valider le puzzle côté backend avec le TOUT NOUVEAU DTO
+    // gameService.validatePuzzle(id, answer, time, hints)
+    await gameService.validatePuzzle(
+        enigmaId, 
+        isSuccess ? 'SUCCESS' : 'FAIL',
+        timeSeconds, // Segundos reales
+        hintsUsed    // Pistas reales
+    )
   } catch (e) {
     console.warn('Impossible de valider le puzzle côté backend:', e)
   }
@@ -145,10 +152,10 @@ async function handleEnigmaCompletion(enigmaId, isSuccess, timeSeconds) {
 }
 
 async function markCompleted() {
-  // Mode dev : marque l'enigme comme complété sans iframe
   clearInterval(timerInterval)
   try {
-    await gameService.validatePuzzle(props.enigmaId, 'SUCCESS')
+    // Para el modo desarrollador, ponemos 0 pistas
+    await gameService.validatePuzzle(props.enigmaId, 'SUCCESS', elapsedSeconds.value, 0)
     await gameService.endGame()
   } catch (e) {
     console.warn('Erreur API (mode test):', e)
@@ -174,19 +181,15 @@ function goBack() {
   router.push('/dashboard')
 }
 
-// Détecter si l'iframe échoue à charger (timeout)
 let loadTimeout = null
 
 onMounted(() => {
-  // Démarrer le timer
   elapsedSeconds.value = 0
   timerInterval = setInterval(() => { elapsedSeconds.value++ }, 1000)
 
-  // Exposer le timer aux enigmes via window
   window.getTimerValue = () => displayTime.value
   window.enigmaId = props.enigmaId
 
-  // Écouter les messages des enigmes
   window.addEventListener('message', handleMessage)
 })
 

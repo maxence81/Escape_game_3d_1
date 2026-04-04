@@ -118,6 +118,38 @@
 
     <div v-if="!loading" class="charts-grid">
 
+      <div class="demographics-grid">
+        <div class="chart-card glass-panel">
+          <h4>Répartition par Public Cible</h4>
+          <div class="demo-bars">
+            <div v-for="(count, profil) in stats.repartitionProfil" :key="profil" class="demo-bar-container">
+              <div class="demo-label">
+                <span>{{ profil }}</span>
+                <strong>{{ count }} joueur(s)</strong>
+              </div>
+              <div class="demo-track">
+                <div class="demo-fill bg-cyan" :style="{ width: getPercentage(count, stats.totalPlayers) + '%' }"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card glass-panel">
+          <h4>Tranches d'Âge</h4>
+          <div class="demo-bars">
+            <div v-for="(count, ageGroup) in stats.repartitionAge" :key="ageGroup" class="demo-bar-container">
+              <div class="demo-label">
+                <span>{{ ageGroup }}</span>
+                <strong>{{ count }} joueur(s)</strong>
+              </div>
+              <div class="demo-track">
+                <div class="demo-fill bg-purple" :style="{ width: getPercentage(count, stats.totalPlayers) + '%' }"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="chart-card glass-panel">
         <h4>Temps Moyen par Énigme (minutes)</h4>
         <div class="chart-container flex-end bar-chart">
@@ -228,7 +260,9 @@ const loading = ref(true)
 const stats = ref({
   totalPlayers: 0,
   averageTimeMinutes: 0,
-  successRate: 0
+  successRate: 0,
+  repartitionProfil: {},
+  repartitionAge: {}
 })
 
 const recentPlayers = ref([])
@@ -306,9 +340,32 @@ function exportCSV() {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+function getPercentage(count, total) {
+  if (!total || total === 0) return 0;
+  return Math.round((count / total) * 100);
+}
 </script>
 
 <style scoped>
+
+/* Demographics / Barras Horizontales */
+.demographics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+.demo-bars { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+.demo-bar-container { display: flex; flex-direction: column; gap: 0.4rem; }
+.demo-label { display: flex; justify-content: space-between; font-size: 0.85rem; color: rgba(255,255,255,0.8); }
+.demo-track { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+.demo-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease-out; }
+.bg-cyan { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+.bg-purple { background: linear-gradient(90deg, #9333ea, #c084fc); }
+
+/* Para el select del formulario */
+select.select-field { background-color: transparent; cursor: pointer; appearance: none; }
+select.select-field option { background-color: #0f172a; color: white; }
+
+@media (max-width: 768px) {
+  .demographics-grid { grid-template-columns: 1fr; }
+}
 .admin-layout {
   width: 100%;
   max-width: 1000px;

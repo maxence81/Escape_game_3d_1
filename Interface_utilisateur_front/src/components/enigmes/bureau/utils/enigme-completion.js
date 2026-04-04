@@ -1,40 +1,25 @@
-﻿/**
- * enigme-completion.js
- * 
- * Utilitaire partagé pour notifier le dashboard parent
- * quand une enigme est terminée (succès ou échec).
- * 
- * À importer dans chaque App.vue des enigmes.
- * 
- * Usage:
- *   import { notifyEnigmaCompleted } from '../../../../utils/enigme-completion.js'
- *   notifyEnigmaCompleted(true)   // succès
- *   notifyEnigmaCompleted(false)  // échec
- */
-
-/**
- * Envoie un postMessage au parent (EnigmeBridge.vue dans le dashboard)
- * pour signaler la fin de l'enigme.
- * 
- * @param {boolean} success - true si l'enigme est réussie
- * @param {number|null} enigmaId - ID de l'enigme (optionnel, récupéré depuis window)
- */
-export function notifyEnigmaCompleted(success = true, enigmaId = null) {
+﻿export function notifyEnigmaCompleted(success = true, enigmaId = null, hintsUsed = null) {
   const id = enigmaId || window.enigmaId || null
   const timeSeconds = getTimerSeconds()
+
+  // ✅ NUEVO: Recuperamos las pistas usadas (las pasamos por parámetro o las leemos de localStorage)
+  const hints = hintsUsed !== null ? hintsUsed : parseInt(localStorage.getItem('currentEnigmaHints') || '0');
 
   const message = {
     type: 'ENIGMA_COMPLETED',
     enigmaId: id,
     success: success,
     timeSeconds: timeSeconds,
+    hintsUsed: hints // Enviamos las pistas al parent
   }
 
   // Envoyer au parent (si dans un iframe)
   if (window.parent && window.parent !== window) {
     window.parent.postMessage(message, '*')
-  }
-
+  }  
+  // Envoyer aussi à la fenêtre courante pour le mode SFC
+  window.postMessage(message, '*')
+  
   // Stocker dans localStorage pour récupération
   localStorage.setItem('lastEnigmaResult', JSON.stringify({
     ...message,
@@ -42,6 +27,9 @@ export function notifyEnigmaCompleted(success = true, enigmaId = null) {
   }))
 
   console.log('[Enigme] Résultat envoyé:', message)
+
+  // Limpiar el contador de pistas para la siguiente sala
+  localStorage.removeItem('currentEnigmaHints');
 }
 
 /**

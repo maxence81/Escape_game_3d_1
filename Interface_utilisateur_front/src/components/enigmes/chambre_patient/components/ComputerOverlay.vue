@@ -188,8 +188,8 @@ function validate() {
     showComputer.value = false // Fermer automatiquement l'ordinateur
     startConfetti()
 
-    // âœ… Notifier le dashboard parent â€” succès enigme 2
-    notifyEnigmaCompleted(true, 2)
+    // âœ… Notifier le dashboard parent â€” succès enigme 3
+    notifyEnigmaCompleted(true, 3)
   } else {
     globalError.value = "Échec de la validation. Vérifiez les paramètres d'entrée."
   }

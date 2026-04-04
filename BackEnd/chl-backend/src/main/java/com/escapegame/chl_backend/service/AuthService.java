@@ -39,6 +39,7 @@ public class AuthService {
         player.setEtablissement(request.getEtablissement());
         player.setDateNaissance(request.getDateNaissance());
         player.setDateInscription(LocalDate.now());
+        player.setProfil(request.getProfil());
 
         playerRepository.save(player);
     }
