@@ -96,6 +96,25 @@
         <div v-if="levels.length === 0" class="empty-state">
           <p>Aucun enigme disponible pour le moment.</p>
         </div>
+
+        <!-- Bouton Conclusion de fin de jeu -->
+        <div v-if="levels.length > 0" class="conclusion-section">
+          <button 
+            class="btn-conclusion" 
+            :class="{ 'btn-conclusion-locked': completedCount < levels.length, 'btn-conclusion-unlocked': completedCount === levels.length }"
+            :disabled="completedCount < levels.length"
+            @click="$router.push('/conclusion')"
+          >
+            <span v-if="completedCount < levels.length" class="conclusion-content">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              Conclure l'enquête ({{ completedCount }} / {{ levels.length }} énigmes résolues)
+            </span>
+            <span v-else class="conclusion-content">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              Conclure l'enquête (Trouver le coupable)
+            </span>
+          </button>
+        </div>
       </main>
     </div>
   </div>
@@ -543,6 +562,61 @@ onMounted(() => {
   text-align: center;
   padding: 3rem;
   color: rgba(255,255,255,0.5);
+}
+
+.conclusion-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.btn-conclusion {
+  width: 100%;
+  max-width: 600px;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
+}
+
+.conclusion-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-conclusion-locked {
+  background: rgba(15, 23, 42, 0.6);
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: not-allowed;
+}
+
+.btn-conclusion-unlocked {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+  animation: pulse-glow 2s infinite;
+}
+
+.btn-conclusion-unlocked:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6);
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(236, 72, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
 }
 
 @media (max-width: 900px) {
