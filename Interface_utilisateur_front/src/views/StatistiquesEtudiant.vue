@@ -21,7 +21,7 @@
       <div class="profile-right">
         <div class="success-box">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          <div class="rate-val color-cyan">1 / 5</div>
+          <div class="rate-val color-cyan">{{ completedCount }} / {{ totalLevels }}</div>
           <div class="rate-label">Niveaux complétés</div>
         </div>
       </div>
@@ -30,19 +30,19 @@
     <!-- KPIs -->
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-info"><span class="kpi-label">Énigmes résolues</span><span class="kpi-value">1/5</span></div>
+        <div class="kpi-info"><span class="kpi-label">Énigmes résolues</span><span class="kpi-value">{{ completedCount }}/{{ totalLevels }}</span></div>
         <div class="kpi-icon bg-blue"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-info"><span class="kpi-label">Temps total</span><span class="kpi-value">10.2 min</span></div>
+        <div class="kpi-info"><span class="kpi-label">Temps total</span><span class="kpi-value">--</span></div>
         <div class="kpi-icon bg-pink"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-info"><span class="kpi-label">Score global</span><span class="kpi-value">95/100</span></div>
+        <div class="kpi-info"><span class="kpi-label">Score global</span><span class="kpi-value">--/100</span></div>
         <div class="kpi-icon bg-green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-info"><span class="kpi-label">Total erreurs</span><span class="kpi-value">2</span></div>
+        <div class="kpi-info"><span class="kpi-label">Total erreurs</span><span class="kpi-value">--</span></div>
         <div class="kpi-icon bg-orange"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
       </div>
     </div>
@@ -113,24 +113,18 @@
       <div class="chart-card glass-panel">
         <h4>Détails par Énigme</h4>
         <div class="enigme-list">
-          <div class="enigme-item">
+          <div v-for="enigme in enigmas" :key="enigme.id" class="enigme-item" :class="{ locked: enigme.status === 'VERROUILLÉ' }">
             <div class="enigme-meta">
-              <strong>Énigme 1 : Salle de Réanimation</strong><span class="status-success">Réussi</span>
+              <strong>Énigme {{ enigme.id }} : {{ enigme.nom || 'Inconnu' }}</strong>
+              <span v-if="enigme.status === 'RÉUSSI'" class="status-success">Réussi</span>
+              <span v-else-if="enigme.status === 'VERROUILLÉ'" class="status-locked">Verrouillé</span>
+              <span v-else class="status-start">À commencer</span>
             </div>
             <div class="enigme-stats">
-              <div><span>Temps</span><span>10.2 min</span></div>
-              <div><span>Tentatives</span><span>2</span></div>
-              <div><span>Score</span><span>95/100</span></div>
-            </div>
-          </div>
-          <div class="enigme-item locked">
-            <div class="enigme-meta">
-              <strong>Énigme 2 : Bureau Médecin</strong><span class="status-locked">Verrouillé</span>
-            </div>
-            <div class="enigme-stats">
-              <div><span>Temps</span><span>--</span></div>
-              <div><span>Tentatives</span><span>--</span></div>
-              <div><span>Score</span><span>--</span></div>
+              <!-- Dans le futur : afficher les vraies stats de chaque énigme -->
+              <div><span>Status</span><span>{{ enigme.status === 'RÉUSSI' ? 'Complété' : '--' }}</span></div>
+              <div><span>Difficulté</span><span style="text-transform: capitalize;">{{ enigme.difficulte || '--' }}</span></div>
+              <div><span>Score</span><span>{{ enigme.status === 'RÉUSSI' ? '100/100' : '--' }}</span></div>
             </div>
           </div>
         </div>
@@ -140,26 +134,44 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { studentService, authService } from '../services/api'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const userName = ref('Étudiant')
 const userInitials = ref('ET')
 const userEmail = ref('etudiant@example.com')
+const stats = ref(null)
+const enigmas = ref([])
+const loading = ref(true)
 
-onMounted(() => {
+const completedCount = computed(() => enigmas.value.filter(e => e.status === 'RÉUSSI').length)
+const totalLevels = computed(() => enigmas.value.length || 5)
+
+onMounted(async () => {
   const storedName = localStorage.getItem('registeredUserName')
   if (storedName) {
     userName.value = storedName
-    
-    // Create initials
     const parts = storedName.split(' ')
-    if(parts.length > 1) {
-      userInitials.value = (parts[0][0] + parts[1][0]).toUpperCase()
-      userEmail.value = `${parts[0]}.${parts[1]}@example.com`.toLowerCase()
-    } else {
-      userInitials.value = parts[0][0].toUpperCase() + 'U'
-      userEmail.value = `${parts[0]}@example.com`.toLowerCase()
+    userInitials.value = parts.length > 1
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : parts[0][0].toUpperCase() + 'U'
+  }
+
+  userEmail.value = localStorage.getItem('userEmail') || 'etudiant@example.com'
+
+  try {
+    stats.value = await studentService.getMyStats()
+    enigmas.value = await studentService.getDashboardData()
+  } catch (error) {
+    console.error('Erreur stats:', error)
+    if (error.message.startsWith('401') || error.message.startsWith('403')) {
+      authService.logout()
+      router.push('/connexion')
     }
+  } finally {
+    loading.value = false
   }
 })
 </script>
