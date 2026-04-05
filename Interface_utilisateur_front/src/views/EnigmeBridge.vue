@@ -46,6 +46,26 @@
       </div>
     </div>
 
+    <!-- Modal Fiche Pédagogique -->
+    <div v-if="showFicheModal" class="modal-overlay" style="z-index: 3000;">
+      <div class="modal-box fiche-modal">
+        <button @click="showFicheModal = false" class="btn-close-modal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Fermer la fiche
+        </button>
+        <div class="fiche-content-wrapper">
+          <Suspense>
+            <template #default>
+              <component :is="activeFicheComponent" @continue="goBack" />
+            </template>
+            <template #fallback>
+              <div class="frame-loading"><div class="spinner"></div><p>Chargement de la fiche...</p></div>
+            </template>
+          </Suspense>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal de félicitations -->
     <div v-if="showSuccessModal" class="modal-overlay">
       <div class="modal-box success-modal">
@@ -55,6 +75,7 @@
         <p class="time-result">Temps : <strong>{{ displayTime }}</strong></p>
         <p class="score-result">Score : <strong class="score-value">{{ finalScore }} / 1000</strong></p>
         <button @click="goBack" class="btn-back-success">Retour au dashboard</button>
+        <button v-if="activeFicheComponent" @click="showFicheModal = true" class="btn-fiche-success">Voir la fiche pédagogique</button>
 
         <div class="logos-container">
           <a href="https://isis.univ-jfc.fr/le-connected-health-lab" target="_blank" rel="noopener noreferrer">
@@ -89,9 +110,19 @@ const componentsMap = {
 }
 const activeComponent = computed(() => componentsMap[props.enigmaId])
 
+const fichesMap = {
+  1: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheSalleReseau.vue')),
+  2: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheIngenierieSociale.vue')),
+  3: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheIntelligenceArtificielle.vue')),
+  4: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheRetroconception.vue')),
+  5: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheResponsabiliteEthique.vue')),
+}
+const activeFicheComponent = computed(() => fichesMap[props.enigmaId])
+
 const router = useRouter()
 const showExitModal = ref(false)
 const showSuccessModal = ref(false)
+const showFicheModal = ref(false)
 
 // Timer
 const elapsedSeconds = ref(0)
@@ -450,5 +481,63 @@ onBeforeUnmount(() => {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
+}
+
+.btn-fiche-success {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  width: 100%;
+}
+.btn-fiche-success:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+.fiche-modal {
+  width: 90vw;
+  max-width: 1200px;
+  height: 90vh;
+  display: flex !important;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.fiche-content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+  position: relative;
+  text-align: left;
+}
+
+.btn-close-modal {
+  background: rgba(15, 23, 42, 0.95);
+  border: none;
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.btn-close-modal:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 </style>
