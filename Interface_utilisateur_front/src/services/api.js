@@ -2,7 +2,7 @@
 // 🚀 SERVICE D'API - CONNECTÉ AU BACKEND SPRING BOOT
 // =========================================================================
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://13.51.174.246/api';
 
 // Helper pour les headers authentifiés
 function authHeaders() {
@@ -27,7 +27,8 @@ export const authService = {
         prenom: userData.prenom,
         nom: userData.nom,
         pseudo: userData.pseudo || userData.prenom,
-        etablissement: userData.etablissement || 'CHL',
+        // ✅ NUEVO: Enviamos 'profil' en lugar de 'etablissement'
+        profil: userData.profil, 
         dateNaissance: userData.dateNaissance,
       }),
     });
@@ -115,13 +116,16 @@ export const gameService = {
   },
 
   // Valide la réponse d'un puzzle et enregistre l'attempt
-  async validatePuzzle(enigmaId, answer) {
+  async validatePuzzle(enigmaId, answer, timeSpentSeconds = 0, hintsUsed = 0) {
     const response = await fetch(`${API_BASE_URL}/game/validate-puzzle`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({
         puzzleId: String(enigmaId),
         answer: answer,
+        // ✅ Enviamos el tiempo y las pistas al backend
+        timeSpentSeconds: timeSpentSeconds,
+        hintsUsed: hintsUsed
       }),
     });
     if (!response.ok) throw new Error('Erreur lors de la validation');
