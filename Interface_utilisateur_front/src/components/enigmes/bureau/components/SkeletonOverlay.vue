@@ -85,6 +85,9 @@ function validateAnswers() {
 
     // ✅ Notifier le dashboard parent
     notifyEnigmaCompleted(true, 2)
+  } else {
+    // ❌ Notifier erreur au dashboard parent
+    notifyEnigmaCompleted(false, 2)
   }
 }
 

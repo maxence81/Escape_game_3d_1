@@ -153,34 +153,33 @@ function handleMessage(event) {
 
 // ✅ MODIFICADO: Recibir hintsUsed y pasarlo al backend
 async function handleEnigmaCompletion(enigmaId, isSuccess, timeSeconds, hintsUsed) {
-  clearInterval(timerInterval)
+    if (isSuccess) {
+      clearInterval(timerInterval)
+      showSuccessModal.value = true
+    }
 
-  if (isSuccess) {
-    showSuccessModal.value = true
-  } else {
-    goBack()
-  }
+    try {
+      // 1. Valider le puzzle côté backend avec le TOUT NOUVEAU DTO
+      // gameService.validatePuzzle(id, answer, time, hints)
+      await gameService.validatePuzzle(
+          enigmaId, 
+          isSuccess ? 'SUCCESS' : 'FAIL',
+          timeSeconds, // Segundos reales
+          hintsUsed    // Pistas reales
+      )
+    } catch (e) {
+      console.warn('Impossible de valider le puzzle côté backend:', e)
+    }
 
-  try {
-    // 1. Valider le puzzle côté backend avec le TOUT NOUVEAU DTO
-    // gameService.validatePuzzle(id, answer, time, hints)
-    await gameService.validatePuzzle(
-        enigmaId, 
-        isSuccess ? 'SUCCESS' : 'FAIL',
-        timeSeconds, // Segundos reales
-        hintsUsed    // Pistas reales
-    )
-  } catch (e) {
-    console.warn('Impossible de valider le puzzle côté backend:', e)
+    if (isSuccess) {
+      try {
+        // 2. Terminer la session uniquement si l'énigme est validée
+        await gameService.endGame()
+      } catch (e) {
+        console.warn('Impossible de terminer la session:', e)
+      }
+    }
   }
-
-  try {
-    // 2. Terminer la session
-    await gameService.endGame()
-  } catch (e) {
-    console.warn('Impossible de terminer la session:', e)
-  }
-}
 
 async function markCompleted() {
   clearInterval(timerInterval)

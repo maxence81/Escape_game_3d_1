@@ -57,14 +57,15 @@
     </div>
 
     <!-- Émet l'action continue pour le binôme ou retourne au menu principal par défaut -->
-    <button @click="$emit('continue')" class="btn-start">
-      Terminer l'Expérience
-    </button>
-  </div>
-</template>
+      <button @click="$router.push('/dashboard')" class="btn-start">
+        Conclure l'enquête
+      </button>
+    </div>
+  </template>
 
-<script setup>
-defineEmits(['continue'])
+  <script setup>
+  import { useRouter } from 'vue-router'
+  const $router = useRouter()
 </script>
 
 <style scoped>

@@ -192,6 +192,8 @@ function validate() {
     notifyEnigmaCompleted(true, 3)
   } else {
     globalError.value = "Échec de la validation. Vérifiez les paramètres d'entrée."
+    // âŒ Notifier erreur au dashboard parent
+    notifyEnigmaCompleted(false, 3)
   }
 }
 

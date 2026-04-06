@@ -95,10 +95,12 @@ export function useGameState() {
       closeWindow()
       showOS.value = false
 
-      // âœ… Notifier le dashboard parent â€” succès enigme 4
+      // ✅ Notifier le dashboard parent — succès enigme 1
       notifyEnigmaCompleted(true, 1)
     } else {
       showNotif("Réponse(s) incorrecte(s). Veuillez vérifier le rapport d'autopsie.", 3000)
+      // ✅ Notifier le dashboard parent — erreur enigme 1
+      notifyEnigmaCompleted(false, 1)
     }
   }
 

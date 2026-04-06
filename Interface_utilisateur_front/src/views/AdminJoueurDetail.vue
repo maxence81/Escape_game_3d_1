@@ -242,8 +242,8 @@ const computedEnigmasList = computed(() => {
     return {
       id: index + 1, nom: name, status: status,
       time: found ? found.avgTime : null,
-      erreurs: found ? found.erreurs : 0,  
-      score: found ? found.score : 0       
+      erreurs: found ? found.erreurs : 0,
+      score: found ? Math.max(0, 100 - (found.erreurs * 10)) : 0
     };
   });
 })

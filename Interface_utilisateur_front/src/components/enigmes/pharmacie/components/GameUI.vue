@@ -266,6 +266,8 @@ function submitAnswers() {
     if (!q3ok) wrong.push('3')
     validationMessage.value = `Réponse(s) incorrecte(s) (question${wrong.length > 1 ? 's' : ''} ${wrong.join(', ')}) â€” accès refusé.`
     validationSuccess.value = false
+    // ❌ Notifier erreur au dashboard parent
+    notifyEnigmaCompleted(false, 4)
   }
 }
 </script>
