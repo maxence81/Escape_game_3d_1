@@ -2,7 +2,7 @@
 // 🚀 SERVICE D'API - CONNECTÉ AU BACKEND SPRING BOOT
 // =========================================================================
 
-const API_BASE_URL = 'http://13.51.174.246/api';
+const API_BASE_URL = 'https://apiescapegame.duckdns.org/api';
 
 // Helper pour les headers authentifiés
 function authHeaders() {
