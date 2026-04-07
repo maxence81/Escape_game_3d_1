@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="dashboard-layout">
     <header class="dashboard-header">
       <button @click="logout" class="btn-logout">
@@ -115,6 +115,34 @@
             </span>
           </button>
         </div>
+
+        <!-- Bouton Télécharger le certificat -->
+        <div v-if="completedCount === levels.length && levels.length > 0" class="certificate-section">
+          <div class="certificate-card">
+            <div class="certificate-icon-glow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <div class="certificate-text">
+              <h4>Certificat de Complétion</h4>
+              <p>Vous avez terminé toutes les énigmes. Téléchargez votre certificat officiel.</p>
+            </div>
+            <button @click="downloadCertificate" class="btn-certificate" :disabled="generatingPdf">
+              <svg v-if="!generatingPdf" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <div v-else class="spinner-small"></div>
+              {{ generatingPdf ? 'Génération...' : 'Télécharger PDF' }}
+            </button>
+          </div>
+        </div>
       </main>
     </div>
   </div>
@@ -124,12 +152,15 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { authService, studentService, gameService } from '../services/api'
+import { jsPDF } from 'jspdf'
 
 const router = useRouter()
 const userName = ref('utilisateur')
 const levels = ref([])
 const loading = ref(true)
 const error = ref(null)
+const generatingPdf = ref(false)
+const logoBase64 = ref(null)
 
 // Mapping enigme ID -> route de l'enigme (ordre défini par les sous-dossiers)
 // IDs dans la BD correspondent à l'ordre d'insertion des enigmes
@@ -250,6 +281,188 @@ async function startEnigma(level) {
 function logout() {
   authService.logout()
   router.push('/')
+}
+
+// Charger le logo ISIS en base64 pour le PDF
+async function loadLogoBase64() {
+  try {
+    const response = await fetch('/logo-ISIS-horizontal-RVB-HD.png')
+    const blob = await response.blob()
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result)
+      reader.readAsDataURL(blob)
+    })
+  } catch (e) {
+    console.error('Erreur chargement logo:', e)
+    return null
+  }
+}
+
+// Calcul du score global pour le certificat
+function computeGlobalScore() {
+  const solved = levels.value.filter(l => l.status === 'RÉUSSI')
+  if (solved.length === 0) return 0
+  // On réutilise la même formule que StatistiquesEtudiant : 100 - (erreurs * 10)
+  // Les niveaux du dashboard n'ont pas forcément les erreurs, on utilise un score estimé
+  return 100
+}
+
+async function downloadCertificate() {
+  if (generatingPdf.value) return
+  generatingPdf.value = true
+
+  try {
+    // Charger le logo si pas encore fait
+    if (!logoBase64.value) {
+      logoBase64.value = await loadLogoBase64()
+    }
+
+    // Charger les stats pour le score réel
+    let globalScore = 0
+    try {
+      const statsData = await studentService.getMyStats()
+      if (statsData && statsData.enigmaTimes) {
+        const standardEnigmas = ['Salle Réseau', 'Bureau Médecin', 'Chambre du Patient', 'Pharmacie', 'Salle de Réunion']
+        const enigmasJoues = standardEnigmas.map((name) => {
+          const found = statsData.enigmaTimes.find(e => e.nom === name)
+          if (found) return Math.max(0, 100 - (found.erreurs * 10))
+          return null
+        }).filter(s => s !== null)
+        if (enigmasJoues.length > 0) {
+          globalScore = Math.round(enigmasJoues.reduce((a, b) => a + b, 0) / enigmasJoues.length)
+        }
+      }
+    } catch (e) {
+      console.warn('Stats non disponibles, score par défaut', e)
+      globalScore = 100
+    }
+
+    // Générer le PDF
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+    const W = 297, H = 210
+
+    // --- Fond dégradé ---
+    const steps = 200
+    for (let i = 0; i < steps; i++) {
+      const t = i / steps
+      const r = Math.round(15 + t * 10)
+      const g = Math.round(10 + t * 5)
+      const b = Math.round(40 + t * 30)
+      doc.setFillColor(r, g, b)
+      doc.rect(0, (H / steps) * i, W, (H / steps) + 1, 'F')
+    }
+
+    // --- Bordure décorative ---
+    doc.setDrawColor(168, 85, 247)
+    doc.setLineWidth(1.5)
+    doc.roundedRect(12, 10, W - 24, H - 20, 4, 4, 'S')
+    doc.setDrawColor(34, 211, 238)
+    doc.setLineWidth(0.5)
+    doc.roundedRect(15, 13, W - 30, H - 26, 3, 3, 'S')
+
+    // --- Étoiles décoratives (petits cercles) ---
+    const starPositions = [
+      [30, 25], [50, 18], [80, 22], [120, 16], [200, 20], [250, 25], [270, 18],
+      [35, 185], [70, 190], [140, 188], [220, 185], [260, 192]
+    ]
+    starPositions.forEach(([sx, sy]) => {
+      doc.setFillColor(168, 85, 247)
+      doc.circle(sx, sy, 0.6, 'F')
+    })
+
+    // --- Logo ISIS ---
+    if (logoBase64.value) {
+      doc.addImage(logoBase64.value, 'PNG', W / 2 - 30, 22, 60, 24)
+    }
+
+    // --- Ligne séparatrice sous le logo ---
+    const lineY = 52
+    doc.setDrawColor(168, 85, 247)
+    doc.setLineWidth(0.4)
+    const lineLen = 80
+    doc.line(W / 2 - lineLen / 2, lineY, W / 2 + lineLen / 2, lineY)
+    // Points décoratifs aux extrémités
+    doc.setFillColor(34, 211, 238)
+    doc.circle(W / 2 - lineLen / 2, lineY, 1, 'F')
+    doc.circle(W / 2 + lineLen / 2, lineY, 1, 'F')
+
+    // --- Titre ---
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(28)
+    doc.setTextColor(255, 255, 255)
+    doc.text('CERTIFICAT DE COMPLÉTION', W / 2, 66, { align: 'center' })
+
+    // --- Sous-titre ---
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(12)
+    doc.setTextColor(180, 180, 200)
+    doc.text('Escape Game ', W / 2, 76, { align: 'center' })
+
+    // --- "Décerné à" ---
+    doc.setFontSize(11)
+    doc.setTextColor(168, 85, 247)
+    doc.text('Ce certificat est décerné à', W / 2, 92, { align: 'center' })
+
+    // --- Nom du joueur ---
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(26)
+    doc.setTextColor(34, 211, 238)
+    doc.text(userName.value.toUpperCase(), W / 2, 106, { align: 'center' })
+
+    // --- Ligne sous le nom ---
+    doc.setDrawColor(34, 211, 238)
+    doc.setLineWidth(0.3)
+    const nameLineLen = 100
+    doc.line(W / 2 - nameLineLen / 2, 110, W / 2 + nameLineLen / 2, 110)
+
+    // --- Texte de complétion ---
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    doc.setTextColor(200, 200, 220)
+    doc.text('pour avoir complété avec succès les 5 énigmes', W / 2, 120, { align: 'center' })
+    doc.text("de l'Escape Game de l'Ecole d'Ingénieur ISIS.", W / 2, 127, { align: 'center' })
+
+    // --- Bloc Score ---
+    const scoreBoxW = 70, scoreBoxH = 28
+    const scoreBoxX = W / 2 - scoreBoxW / 2, scoreBoxY = 136
+    doc.setFillColor(30, 20, 60)
+    doc.setDrawColor(168, 85, 247)
+    doc.setLineWidth(0.6)
+    doc.roundedRect(scoreBoxX, scoreBoxY, scoreBoxW, scoreBoxH, 3, 3, 'FD')
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(168, 85, 247)
+    doc.text('SCORE GLOBAL', W / 2, scoreBoxY + 9, { align: 'center' })
+
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(20)
+    doc.setTextColor(34, 211, 238)
+    doc.text(`${globalScore} / 100`, W / 2, scoreBoxY + 22, { align: 'center' })
+
+    // --- Date ---
+    const now = new Date()
+    const dateStr = now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    doc.setFont('helvetica', 'italic')
+    doc.setFontSize(9)
+    doc.setTextColor(150, 150, 170)
+    doc.text(`Délivré le ${dateStr}`, W / 2, 178, { align: 'center' })
+
+    // --- Footer ---
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(7)
+    doc.setTextColor(100, 100, 130)
+    doc.text('Projet FIE-3 • ISIS Ingénieur Santé Numérique • Centre Hospitalier de Lourdes', W / 2, 195, { align: 'center' })
+
+    // Télécharger
+    doc.save(`Certificat_EscapeGame_${userName.value.replace(/\s+/g, '_')}.pdf`)
+  } catch (e) {
+    console.error('Erreur génération certificat:', e)
+    alert('Erreur lors de la génération du certificat. Réessayez.')
+  } finally {
+    generatingPdf.value = false
+  }
 }
 
 onMounted(() => {
@@ -619,8 +832,114 @@ onMounted(() => {
   100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
 }
 
+/* Certificate Section */
+.certificate-section {
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.certificate-card {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(34, 211, 238, 0.08));
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  animation: certificate-glow 3s ease-in-out infinite;
+}
+
+.certificate-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+@keyframes certificate-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.15); }
+  50% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.25), 0 0 60px rgba(34, 211, 238, 0.1); }
+}
+
+.certificate-icon-glow {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(34, 211, 238, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #d8b4fe;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.certificate-text {
+  flex: 1;
+}
+
+.certificate-text h4 {
+  margin: 0 0 0.3rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 0.01em;
+}
+
+.certificate-text p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.4;
+}
+
+.btn-certificate {
+  background: linear-gradient(135deg, #a855f7, #22d3ee);
+  color: white;
+  border: none;
+  padding: 0.65rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+  flex-shrink: 0;
+}
+
+.btn-certificate:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+}
+
+.btn-certificate:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
 @media (max-width: 900px) {
   .dashboard-content { flex-direction: column; }
   .profile-panel { width: 100%; position: relative; top: 0; min-height: auto; }
+  .certificate-card { flex-direction: column; text-align: center; }
 }
 </style>
