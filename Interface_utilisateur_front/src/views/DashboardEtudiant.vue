@@ -250,6 +250,18 @@ async function loadDashboard() {
   try {
     const data = await studentService.getDashboardData()
     levels.value = data
+
+    // Récupérer le vrai nom depuis les statistiques du joueur
+    try {
+      const stats = await studentService.getMyStats()
+      if (stats && stats.playerName) {
+        userName.value = stats.playerName
+        localStorage.setItem('registeredUserName', stats.playerName)
+      }
+    } catch (statsErr) {
+      console.warn('Impossible de récupérer le nom du joueur', statsErr)
+    }
+
   } catch (e) {
     error.value = 'Impossible de charger votre progression. Vérifiez votre connexion.'
     console.error(e)
