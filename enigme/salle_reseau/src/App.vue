@@ -7,7 +7,7 @@
         :wifiConnected="isWifiConnected"
         :safeOpened="isSafeOpened"
         :routerHintActive="routerHintActive"
-        @onWifiConnected="handleWifiConnected"
+        @onRouterClick="showCableMinigame = true"
         @onMonitorClick="handleMonitorClick"
         @onSafeClick="handleSafeClick"
       />
@@ -54,6 +54,12 @@
         @close="showAutopsyReport = false"
       />
 
+      <CableMinigame
+        v-if="showCableMinigame"
+        @solved="handleWifiConnected(); showCableMinigame = false"
+        @close="showCableMinigame = false"
+      />
+
       <VictoryScreen
         v-if="gamePassed"
       />
@@ -72,6 +78,7 @@ import OsDesktop from './components/OsDesktop.vue'
 import SafePadlock from './components/SafePadlock.vue'
 import AutopsyReport from './components/AutopsyReport.vue'
 import VictoryScreen from './components/VictoryScreen.vue'
+import CableMinigame from './components/CableMinigame.vue'
 import DocumentInventory from '../../DocumentInventory.vue'
 import { useGameState } from './composables/useGameState.js'
 
@@ -105,6 +112,7 @@ const {
 } = useGameState()
 
 const discoveredSecretFile = ref(false)
+const showCableMinigame = ref(false)
 
 watch(activeWindow, (win) => {
   if (win === 'secret_file') discoveredSecretFile.value = true

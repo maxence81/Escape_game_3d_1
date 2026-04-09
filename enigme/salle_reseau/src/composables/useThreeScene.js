@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js'
@@ -14,14 +13,12 @@ export function useThreeScene(container, props, emit) {
   const loadingProgress = ref(0)
 
   let scene, camera, renderer, composer
-  let orbitControls, dragControls
+  let orbitControls
   let reqId
   let raycaster, mouse
   let interactableMeshes = []
-  let objectsToDrag = []
 
   let wifiMesh = null
-  let socketMesh = null
   let monitorMesh = null
   let safeMesh = null
   let safeDoorMesh = null
@@ -102,7 +99,6 @@ export function useThreeScene(container, props, emit) {
             interactableMeshes.push(child)
 
             if (name.includes('wifi')) wifiMesh = child
-            if (name.includes('socket')) socketMesh = child
             if (name.includes('cylinder003_13')) monitorMesh = child
             if (name.includes('safe')) {
               safeMesh = child
@@ -132,39 +128,6 @@ export function useThreeScene(container, props, emit) {
 
   function postLoadSetup(hasRealModel) {
     isLoading.value = false
-
-    if (wifiMesh) {
-      objectsToDrag.push(wifiMesh)
-      dragControls = new DragControls(objectsToDrag, camera, renderer.domElement)
-
-      dragControls.addEventListener('dragstart', function (event) {
-        orbitControls.enabled = false
-        if (event.object.material) event.object.material.emissiveIntensity = 1.0
-      })
-
-      dragControls.addEventListener('drag', function (event) {
-        if (socketMesh) {
-          const dist = event.object.position.distanceTo(socketMesh.position)
-          if (dist < 1.0) {
-            event.object.position.copy(socketMesh.position)
-            event.object.position.z += 0.2
-            emit('onWifiConnected')
-            dragControls.enabled = false
-            orbitControls.enabled = true
-            if (event.object.material) event.object.material.emissive.setHex(0x00ff00)
-          }
-        }
-      })
-
-      dragControls.addEventListener('dragend', function (event) {
-        orbitControls.enabled = true
-        if (props.wifiConnected && event.object.material) {
-          event.object.material.emissive.setHex(0x00ff00)
-        } else if (event.object.material) {
-          event.object.material.emissiveIntensity = 0.5
-        }
-      })
-    }
   }
 
   function updateMonitorState(isConnected) {
@@ -229,7 +192,9 @@ export function useThreeScene(container, props, emit) {
         current = current.parent
       }
 
-      if (clickedName.includes('monitor') || clickedName.includes('cylinder003_13')) {
+      if (clickedName.includes('wifi') && !props.wifiConnected) {
+        emit('onRouterClick')
+      } else if (clickedName.includes('monitor') || clickedName.includes('cylinder003_13')) {
         emit('onMonitorClick')
       } else if (clickedName.includes('safe')) {
         emit('onSafeClick')
@@ -244,15 +209,13 @@ export function useThreeScene(container, props, emit) {
       if (props.wifiConnected) {
         wifiMesh.material.emissive.setHex(0x00ff00)
         wifiMesh.material.emissiveIntensity = 1.0
-      } else if (props.routerHintActive && orbitControls && orbitControls.enabled) {
+      } else if (props.routerHintActive) {
         const time = performance.now() * 0.005
         wifiMesh.material.emissive.setHex(0xffaa00)
         wifiMesh.material.emissiveIntensity = 0.2 + Math.abs(Math.sin(time)) * 0.8
-      } else if (orbitControls && orbitControls.enabled) {
+      } else {
         wifiMesh.material.emissive.setHex(0x000000)
         wifiMesh.material.emissiveIntensity = 0.0
-      } else if (orbitControls && !orbitControls.enabled) {
-        wifiMesh.material.emissive.setHex(0xffffff)
       }
     }
 

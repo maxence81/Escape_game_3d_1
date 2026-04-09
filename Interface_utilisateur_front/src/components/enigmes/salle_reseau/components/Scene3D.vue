@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="scene-wrapper">
     <div ref="container" class="scene-container"></div>
     <CapybaraLoader v-if="isLoading" :progress="loadingProgress" />
@@ -25,7 +25,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['onWifiConnected', 'onMonitorClick', 'onSafeClick'])
+const emit = defineEmits(['onWifiConnected', 'onMonitorClick', 'onSafeClick', 'onRouterClick'])
 
 const container = ref(null)
 

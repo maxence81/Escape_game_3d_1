@@ -43,6 +43,9 @@
         </div>
         <h3 class="greeting">Bonjour,<br/><span class="username">[{{ userName }}]</span> !</h3>
         <p class="ready-text">Prêt(e) pour relever le défi ?</p>
+        <button class="btn-replay-global-intro" @click="$router.push('/introduction')">
+          Revoir l'introduction
+        </button>
         <div class="progress-summary">
           <div class="progress-bar-bg">
             <div class="progress-bar-fill" :style="{ width: progressPercent + '%' }"></div>
@@ -70,25 +73,36 @@
             </div>
             <p class="level-subtitle">{{ getLevelSubtitle(index) }}</p>
             <p class="level-desc">{{ level.description || getLevelDesc(index) }}</p>
-            <button
-              v-if="level.status === 'COMMENCER'"
-              @click="startEnigma(level)"
-              class="btn-start"
-            >
-              Commencer &rsaquo;
-            </button>
-            <button
-              v-else-if="level.status === 'RÉUSSI'"
-              class="btn-solved"
-              disabled
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Complété
-            </button>
-            <button v-else class="btn-locked" disabled>
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              Verrouillé
-            </button>
+            <div class="level-actions">
+              <button
+                v-if="level.status === 'COMMENCER'"
+                @click="startEnigma(level)"
+                class="btn-start"
+              >
+                Commencer &rsaquo;
+              </button>
+              <button
+                v-else-if="level.status === 'RÉUSSI'"
+                class="btn-solved"
+                disabled
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Complété
+              </button>
+              <button v-else class="btn-locked" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Verrouillé
+              </button>
+
+              <button
+                v-if="level.status !== 'VERROUILLÉ'"
+                @click="replayIntro(level.id)"
+                class="btn-replay-level-intro"
+                title="Revoir l'introduction de l'énigme"
+              >
+                Revoir l'introduction
+              </button>
+            </div>
           </div>
         </div>
 
@@ -145,6 +159,13 @@
         </div>
       </main>
     </div>
+
+    <!-- Modal pour l'introduction de l'énigme -->
+    <DashboardIntroScreen 
+      v-if="currentIntroId" 
+      :episodeData="currentEpisodeData" 
+      @finish="stopIntro" 
+    />
   </div>
 </template>
 
@@ -152,6 +173,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { authService, studentService, gameService } from '../services/api'
+import DashboardIntroScreen from '../components/DashboardIntroScreen.vue'
 import { jsPDF } from 'jspdf'
 
 const router = useRouter()
@@ -170,6 +192,69 @@ const ENIGME_ROUTES = {
   3: '/enigme/chambre-patient',
   4: '/enigme/pharmacie',
   5: '/enigme/salle-reunion',
+}
+
+const INTRO_TEXTS = {
+  1: {
+    id: 1, title: 'L\'ENQUÊTE',
+    paragraphs: [
+      "Une mort suspecte a eu lieu.",
+      "Vous êtes dans la salle réseau du laboratoire, un lieu clé pour comprendre ce qui s'est réellement passé.",
+      "Votre mission : rétablir la connexion Internet, accéder au système informatique et trouver le code du coffre-fort.",
+      "En analysant les fichiers secrets et le rapport d'autopsie, vous devrez découvrir la véritable cause du décès.",
+      "Le temps presse... La vérité ne tient qu'à un fil."
+    ]
+  },
+  2: {
+    id: 2, title: 'LE BUREAU DU DOCTEUR DECKARD',
+    paragraphs: [
+      "Vous venez d'entrer dans le bureau du Dr Deckard.",
+      "Ce bureau renferme de nombreux secrets liés au mystère de la mort de Mme Calvin.",
+      "Inspectez chaque recoin, observez l'environnement et fouillez ses dossiers personnels.",
+      "Méfiez-vous des apparences, les réponses sont souvent dissimulées sous vos yeux.",
+      "Le temps est compté... Accedez au serveur et découvrez la vérité."
+    ]
+  },
+  3: {
+    id: 3, title: 'LA CHAMBRE PATIENT',
+    paragraphs: [
+      "La chambre d'hôpital de Mme Calvin est la dernière zone qu'elle a occupée avant son décès.",
+      "Il est crucial d'examiner attentivement ce lieu pour comprendre ce qui lui est arrivé.",
+      "Cherchez des indices dissimulés, décryptez le dossier médical et recomposez les pièces du puzzle.",
+      "Soyez perspicaces, la moindre erreur de jugement pourrait tout fausser..."
+    ]
+  },
+  4: {
+    id: 4, title: 'LA PHARMACIE DE L\'HÔPITAL',
+    paragraphs: [
+      "Vos investigations vous mènent finalement au dispensaire médical de l'hôpital.",
+      "C'est dans ce lieu hautement sécurisé que les traitements de Mme Calvin ont été préparés et délivrés.",
+      "Trouvez l'accès au système de l'ordinateur principal pour accéder au dossier de Mme Calvin.",
+      "Fouillez les registres, analysez le dossier de Mme Calvin et completer le mini jeu.",
+      "Les ours en peluche et le pingouin seront vos pires ennemis..."
+    ]
+  },
+  5: {
+    id: 5, title: 'LA RÉVÉLATION',
+    paragraphs: [
+      "Vous avez rassemblé toutes les pièces du puzzle au cours de vos précédentes investigations.",
+      "Vous voici dans la salle de réunion, le lieu de toutes les décisions.",
+      "Tout indique qu'une erreur a été comise par un de vos collègues. Qui est le véritable responsable ?",
+      "L'heure est venue de confronter les suspects et de faire éclater la vérité.",
+      "La vérité sur la mort de Mme Calvin est entre vos mains."
+    ]
+  }
+}
+
+const currentIntroId = ref(null)
+const currentEpisodeData = computed(() => currentIntroId.value ? INTRO_TEXTS[currentIntroId.value] : null)
+
+function replayIntro(id) {
+  currentIntroId.value = id
+}
+
+function stopIntro() {
+  currentIntroId.value = null
 }
 
 // Données statiques de présentation par index (0-based)
@@ -615,7 +700,23 @@ onMounted(() => {
 .ready-text {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.btn-replay-global-intro {
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  color: #22d3ee;
+  border-radius: 20px;
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 2rem;
+}
+
+.btn-replay-global-intro:hover {
+  background: rgba(34, 211, 238, 0.2);
 }
 
 .progress-summary {
@@ -742,6 +843,13 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
+.level-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .btn-start {
   background: #06b6d4;
   color: white;
@@ -781,6 +889,22 @@ onMounted(() => {
   align-items: center;
   gap: 0.4rem;
   cursor: not-allowed;
+}
+
+.btn-replay-level-intro {
+  background: transparent;
+  color: #a855f7;
+  border: 1px solid #a855f7;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-replay-level-intro:hover {
+  background: rgba(168, 85, 247, 0.1);
 }
 
 .empty-state {
