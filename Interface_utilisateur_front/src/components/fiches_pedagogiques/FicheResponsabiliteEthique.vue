@@ -9,7 +9,7 @@
     
     <div class="intro-text">
       <p>
-        Le jeu s'arrête, mais le débat commence : qui est responsable quand la machine et l'humain travaillent ensemble ?
+        La conclusion de votre enquête vous a poussé à rendre un jugement : face à une erreur médicale impliquant une intelligence artificielle (Emma), qui doit être tenu pour responsable ?
       </p>
     </div>
 
@@ -17,18 +17,6 @@
       <div class="concept-card">
         <div class="icon-wrapper">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
-        </div>
-        <div class="concept-content">
-          <h3>L'ACTIENT</h3>
-          <p>Le patient de demain est un acteur formé et informé qui utilise le numérique pour mieux gérer sa santé.</p>
-        </div>
-      </div>
-
-      <div class="concept-card">
-        <div class="icon-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
             <circle cx="9" cy="7" r="4"></circle>
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -36,8 +24,20 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>Binôme Humain/IA</h3>
-          <p>L'IA est une assistante puissante, mais elle ne remplace pas l'éthique et le jugement final de l'humain.</p>
+          <h3>La Responsabilité Humaine</h3>
+          <p>En désignant le Dr Deckard, vous soulignez une règle de droit fondamentale : une IA n'a pas de personnalité juridique, c'est l'humain la supervisant qui porte la responsabilité finale de la décision.</p>
+        </div>
+      </div>
+
+      <div class="concept-card">
+        <div class="icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div class="concept-content">
+          <h3>Le Rôle de l'IA (Un Simple Outil)</h3>
+          <p>Malgré la puissance de ses réseaux de neurones, Emma reste un outil d'assistance algorithmique. Elle peut suggérer, calculer et synthétiser, mais ne remplacera jamais l'éthique médicale humaine.</p>
         </div>
       </div>
     </div>

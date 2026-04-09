@@ -10,7 +10,7 @@
     <div class="intro-text">
       <p>
         La plus grande faille informatique n'est pas toujours un bug, mais l'humain lui-même. 
-        Vous avez dû "hacker" un accès en utilisant la psychologie.
+        Dans le bureau du Dr Deckard, vous avez "hacké" son ordinateur en utilisant des méthodes d'ingénierie sociale (OSINT) basées sur l'observation.
       </p>
     </div>
 
@@ -25,8 +25,8 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>L'Ingénierie Sociale</h3>
-          <p>C'est l'art de récupérer des informations confidentielles en observant les habitudes d'une personne (ses proches, ses passions).</p>
+          <h3>Ingénierie Sociale / OSINT</h3>
+          <p>En cherchant des indices sur son bureau (le nom de son chien sur une photo, sa date de naissance sur un post-it), vous avez déduit ses accès personnels sans utiliser de force brute logicielle.</p>
         </div>
       </div>
 
@@ -38,8 +38,8 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>La Protection des Données</h3>
-          <p>Utiliser des détails personnels comme mots de passe rend nos données vulnérables.</p>
+          <h3>Faiblesse des Mots de Passe</h3>
+          <p>Utiliser des détails familiers (animaux, diplôme, date de naissance) pour un mot de passe est une pratique dangereuse. Cela rend l'accès aux dossiers médicaux virtuellement sans protection.</p>
         </div>
       </div>
 
@@ -52,8 +52,8 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>Le Big Data</h3>
-          <p>Aujourd'hui, les médecins utilisent des masses de données géantes pour soigner de façon personnalisée, ce qui rend la protection de ces accès vitale.</p>
+          <h3>Accès aux Données de Santé</h3>
+          <p>Une fois le mot de passe trouvé, vous avez eu un accès non restreint à sa messagerie et au serveur exposant les pathologies (grippe, allergie à la cortisone) de S. Calvin.</p>
         </div>
       </div>
     </div>
