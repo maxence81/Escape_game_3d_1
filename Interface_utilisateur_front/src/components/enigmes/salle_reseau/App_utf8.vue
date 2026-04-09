@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div id="app">
     <!-- 3D Background -->
     <Scene3D 
@@ -267,14 +267,14 @@ const answer1 = ref("")
 const answer2 = ref("")
 
 function checkAnswers() {
-  const ans1 = answer1.value.toLowerCase().trim()
-  const ans2 = answer2.value.toLowerCase().trim()
+  const ans1 = answer1.value.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const ans2 = answer2.value.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   
   // Basic flexible string match to be gentle
   const q1Correct = ans1.includes("allergique") && ans1.includes("cortisone")
-  const q2Correct = ans1 === "réaction allergique à la cortisone" || q1Correct
+  const q2Correct = ans1 === "reaction allergique a la cortisone" || q1Correct
   
-  const q3Correct = ans2.includes("bactérienne") && (ans2.includes("pneumopathie") || ans2.includes("pneumonie"))
+  const q3Correct = ans2.includes("bacterienne") && (ans2.includes("pneumopathie") || ans2.includes("pneumonie"))
   
   if (q1Correct && q3Correct) {
     showNotif("Félicitations ! Vous avez validé toutes les étapes.")
