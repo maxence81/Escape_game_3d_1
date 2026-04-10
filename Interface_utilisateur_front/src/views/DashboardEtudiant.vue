@@ -102,6 +102,15 @@
               >
                 Revoir l'introduction
               </button>
+              
+              <button
+                v-if="level.status === 'RÉUSSI'"
+                @click="openFiche(level.id)"
+                class="btn-fiche-pedagogique"
+                title="Revoir la fiche pédagogique"
+              >
+                Revoir la fiche
+              </button>
             </div>
           </div>
         </div>
@@ -166,11 +175,31 @@
       :episodeData="currentEpisodeData" 
       @finish="stopIntro" 
     />
+
+    <!-- Modal Fiche Pédagogique -->
+    <div v-if="currentFicheId" class="modal-overlay" style="z-index: 3000;">
+      <div class="modal-box fiche-modal">
+        <button @click="closeFiche" class="btn-close-modal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Fermer la fiche
+        </button>
+        <div class="fiche-content-wrapper">
+          <Suspense>
+            <template #default>
+              <component :is="activeFicheComponent" @continue="closeFiche" />
+            </template>
+            <template #fallback>
+              <div class="frame-loading"><div class="spinner"></div><p>Chargement de la fiche...</p></div>
+            </template>
+          </Suspense>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { authService, studentService, gameService } from '../services/api'
 import DashboardIntroScreen from '../components/DashboardIntroScreen.vue'
@@ -255,6 +284,25 @@ function replayIntro(id) {
 
 function stopIntro() {
   currentIntroId.value = null
+}
+
+const fichesMap = {
+  1: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheSalleReseau.vue')),
+  2: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheIngenierieSociale.vue')),
+  3: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheIntelligenceArtificielle.vue')),
+  4: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheRetroconception.vue')),
+  5: defineAsyncComponent(() => import('../components/fiches_pedagogiques/FicheResponsabiliteEthique.vue')),
+}
+
+const currentFicheId = ref(null)
+const activeFicheComponent = computed(() => currentFicheId.value ? fichesMap[currentFicheId.value] : null)
+
+function openFiche(id) {
+  currentFicheId.value = id
+}
+
+function closeFiche() {
+  currentFicheId.value = null
 }
 
 // Données statiques de présentation par index (0-based)
@@ -905,6 +953,95 @@ onMounted(() => {
 
 .btn-replay-level-intro:hover {
   background: rgba(168, 85, 247, 0.1);
+}
+
+.btn-fiche-pedagogique {
+  background: transparent;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-fiche-pedagogique:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Modal CSS */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-box {
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  color: white;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+}
+
+.fiche-modal {
+  width: 90vw;
+  max-width: 1200px;
+  height: 90vh;
+  display: flex !important;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.fiche-content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+  position: relative;
+  text-align: left;
+}
+
+.btn-close-modal {
+  background: rgba(15, 23, 42, 0.95);
+  border: none;
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-close-modal:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.frame-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .empty-state {
