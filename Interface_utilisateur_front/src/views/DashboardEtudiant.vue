@@ -170,12 +170,16 @@
     </div>
 
     <!-- Modal pour l'introduction de l'énigme -->
-    <DashboardIntroScreen 
-      v-if="currentIntroId" 
-      :episodeData="currentEpisodeData" 
-      @finish="stopIntro" 
-    />
-
+    <div v-if="currentIntroId" class="modal-overlay" style="z-index: 5000;">
+      <ComicEnigmePanel
+        :title="currentEpisodeData.title"
+        :bgImage="currentEpisodeData.bgImage"
+        buttonText="Fermer l'introduction"
+        @start="stopIntro"
+      >
+        <p v-for="(p, index) in currentEpisodeData.paragraphs" :key="index">{{ p }}</p>
+      </ComicEnigmePanel>
+    </div>
     <!-- Modal Fiche Pédagogique -->
     <div v-if="currentFicheId" class="modal-overlay" style="z-index: 3000;">
       <div class="modal-box fiche-modal">
@@ -202,7 +206,14 @@
 import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { authService, studentService, gameService } from '../services/api'
-import DashboardIntroScreen from '../components/DashboardIntroScreen.vue'
+import ComicEnigmePanel from '../components/ComicEnigmePanel.vue'
+
+import stripReseau from '../assets/comics/strip_reseau.png'
+import stripBureau from '../assets/comics/strip_bureau.png'
+import stripChambre from '../assets/comics/strip_chambre.png'
+import stripPharmacie from '../assets/comics/strip_pharmacie.png'
+import stripReunion from '../assets/comics/strip_reunion.png'
+
 import { jsPDF } from 'jspdf'
 
 const router = useRouter()
@@ -225,7 +236,7 @@ const ENIGME_ROUTES = {
 
 const INTRO_TEXTS = {
   1: {
-    id: 1, title: 'L\'ENQUÊTE',
+    id: 1, title: 'L\'ENQUÊTE', bgImage: stripReseau,
     paragraphs: [
       "Une mort suspecte a eu lieu.",
       "Vous êtes dans la salle réseau du laboratoire, un lieu clé pour comprendre ce qui s'est réellement passé.",
@@ -235,7 +246,7 @@ const INTRO_TEXTS = {
     ]
   },
   2: {
-    id: 2, title: 'LE BUREAU DU DOCTEUR DECKARD',
+    id: 2, title: 'LE BUREAU DU DOCTEUR DECKARD', bgImage: stripBureau,
     paragraphs: [
       "Vous venez d'entrer dans le bureau du Dr Deckard.",
       "Ce bureau renferme de nombreux secrets liés au mystère de la mort de Mme Calvin.",
@@ -245,7 +256,7 @@ const INTRO_TEXTS = {
     ]
   },
   3: {
-    id: 3, title: 'LA CHAMBRE PATIENT',
+    id: 3, title: 'LA CHAMBRE PATIENT', bgImage: stripChambre,
     paragraphs: [
       "La chambre d'hôpital de Mme Calvin est la dernière zone qu'elle a occupée avant son décès.",
       "Il est crucial d'examiner attentivement ce lieu pour comprendre ce qui lui est arrivé.",
@@ -254,7 +265,7 @@ const INTRO_TEXTS = {
     ]
   },
   4: {
-    id: 4, title: 'LA PHARMACIE DE L\'HÔPITAL',
+    id: 4, title: 'LA PHARMACIE DE L\'HÔPITAL', bgImage: stripPharmacie,
     paragraphs: [
       "Vos investigations vous mènent finalement au dispensaire médical de l'hôpital.",
       "C'est dans ce lieu hautement sécurisé que les traitements de Mme Calvin ont été préparés et délivrés.",
@@ -264,7 +275,7 @@ const INTRO_TEXTS = {
     ]
   },
   5: {
-    id: 5, title: 'LA RÉVÉLATION',
+    id: 5, title: 'LA RÉVÉLATION', bgImage: stripReunion,
     paragraphs: [
       "Vous avez rassemblé toutes les pièces du puzzle au cours de vos précédentes investigations.",
       "Vous voici dans la salle de réunion, le lieu de toutes les décisions.",

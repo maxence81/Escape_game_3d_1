@@ -15,7 +15,7 @@
       </div>
 
       <button @click="$emit('start')" class="btn-start-comic">
-        Commencer l'énigme
+        {{ buttonText }}
       </button>
     </div>
   </div>
@@ -24,7 +24,8 @@
 <script setup>
 defineProps({
   title: { type: String, required: true },
-  bgImage: { type: String, required: true }
+  bgImage: { type: String, required: true },
+  buttonText: { type: String, default: "Commencer l'énigme" }
 })
 defineEmits(['start'])
 </script>

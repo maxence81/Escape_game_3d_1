@@ -29,23 +29,12 @@ function skipIntro() {
 
 <style scoped>
 .intro-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #000;
-  overflow: hidden;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: #000; overflow: hidden; z-index: 10000;
+  display: flex; flex-direction: column;
 }
-
 .bd-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #111;
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: #000 url('https://www.transparenttextures.com/patterns/stardust.png') repeat top center;
 }
 </style>

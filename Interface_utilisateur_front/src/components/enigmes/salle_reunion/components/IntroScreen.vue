@@ -34,6 +34,7 @@ function skipIntro() {
   display: flex; flex-direction: column;
 }
 .bd-container {
-  flex: 1; display: flex; align-items: center; justify-content: center; background: #111;
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: #000 url('https://www.transparenttextures.com/patterns/stardust.png') repeat top center;
 }
 </style>

@@ -7,18 +7,24 @@ import GameUI from './components/GameUI.vue'
 
 import HintSystem from './components/HintSystem.vue'
 import DocumentInventory from './components/DocumentInventory.vue'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 
 const showIntro = ref(true)
-const { 
-  gameCompleted, 
-  discoveredClues, 
-  showBearInfo, 
-  showTablesModal, 
-  isComputerUIOpen, 
+const {
+  gameCompleted,
+  discoveredClues,
+  showBearInfo,
+  showTablesModal,
+  isComputerUIOpen,
   showMedicineInfo,
-  currentMedicineName 
+  currentMedicineName,
+  resetGame
 } = useGameState()
+
+onMounted(() => {
+  resetGame()
+  showIntro.value = true
+})
 
 const inventoryDocs = computed(() => [
   { id: 'bear', label: "Note de l'inspecteur", sub: "Code terminal + indices", icon: "image", discovered: discoveredClues.includes('bear') },
