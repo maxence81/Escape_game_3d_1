@@ -1,8 +1,8 @@
 <template>
   <div class="intro-page">
-    <div class="view-toggle">
-      <button :class="{ active: mode === 'classique' }" @click="setMode('classique')">Format Texte</button>
-      <button :class="{ active: mode === 'bd' }" @click="setMode('bd')">Format Bande Dessinée</button>
+    <div class="mode-toggle">
+      <button :class="{ active: mode === 'classique' }" @click="setMode('classique')">Mode Texte</button>
+      <button :class="{ active: mode === 'bd' }" @click="setMode('bd')">Mode Bande Dessinée</button>
     </div>
 
     <!-- Mode Classique -->
@@ -74,40 +74,38 @@ const commencerJeu = () => {
   width: 100%;
 }
 
-.view-toggle {
-  position: relative;
-  z-index: 100;
+.mode-toggle {
   display: flex;
-  justify-content: center;
   gap: 1rem;
-  margin: 1rem 0 2rem 0;
-  background: rgba(0,0,0,0.4);
+  margin-bottom: 2rem;
+  background: rgba(15, 23, 42, 0.6);
   padding: 0.5rem;
   border-radius: 30px;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 100;
+  margin-top: 1rem;
 }
 
-.view-toggle button {
+.mode-toggle button {
   background: transparent;
-  border: 2px solid transparent;
-  color: white;
-  padding: 0.6rem 1.5rem;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0.8rem 1.5rem;
   border-radius: 20px;
-  cursor: pointer;
-  font-weight: 600;
   font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.view-toggle button:hover {
-  background: rgba(255,255,255,0.1);
+.mode-toggle button:hover {
+  color: white;
 }
 
-.view-toggle button.active {
-  background: linear-gradient(135deg, #0cebeb, #20e3b2, #29ffc6); /* Vibrant toggle */
-  color: #000;
-  box-shadow: 0 4px 15px rgba(32, 227, 178, 0.4);
-  text-shadow: none;
+.mode-toggle button.active {
+  background: #22d3ee;
+  color: #0f172a;
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
 }
 
 /* Anciens styles préservés */
