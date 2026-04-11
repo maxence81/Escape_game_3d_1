@@ -1,36 +1,53 @@
 <template>
-  <div class="glass-panel story-container">
-    <h2>Le Briefing</h2>
-    
-    <div class="story-content">
-      <p>
-        Bonjour, je suis Mr Laborde, l'avocat de la famille Calvin. J'ai besoin de gens capables de mener une enquête rapide et fiable. Cela tombe bien, car d'après ce qu'on m'a dit, vous êtes le/la meilleur(e).
-      </p>
-      <p>
-        Dans quelques jours, soit le <strong>{{ dynamicDate }}</strong>, le procès numéro 756 B opposant la famille Calvin que je représente au Dr Deckard ainsi que son assistante Emma va débuter. Malheureusement, il y a encore de nombreuses zones d'ombre et certains détails importants nous échappent.
-      </p>
-      <p>
-        Voici un petit rappel des faits : Mme Calvin est entrée à l’hôpital de Castres pour des difficultés respiratoires (toux, essoufflements, courbatures) associées à de la fièvre et des maux de tête. C'est le Dr Deckard qui s'est occupé d'elle. Après une série d'examens, il a demandé à son assistante Emma de prendre le relais et placer Mme Calvin sous traitement à base d'Ibuprofène. Cependant, Emma a changé le traitement et Mme Calvin est décédée. Le Dr Deckard a immédiatement accusé son assistante de faute grave ayant entraîné la mort. Il estime qu'Emma a délibérément modifié le traitement initialement prescrit. De son côté, Emma rejette l'accusation et considère qu’elle n’a commis aucune erreur.
-      </p>
-      <p>
-        Suite à l'autopsie de Mme Calvin, il est clair qu'une erreur a été commise, mais nous ignorons si nous devons poursuivre le Dr Deckard ou son assistante. Voici un questionnaire qui, une fois rempli, devrait vous permettre de déterminer qui est responsable du décès de Mme Calvin (donner le questionnaire). Nous avons besoin d'une réponse claire. Vous devez vous positionner : les deux ou aucun des deux ne sont pas des réponses acceptables.
-      </p>
-      <p>
-        Je vous rappelle également que dans quelques mois, un projet de loi très controversé doit être voté : la loi Batty. Elle accorde aux IA médicales le droit de prendre des décisions sans la vérification ni la validation d'un être humain. Vous conviendrez donc que dans ce contexte tendu qui concerne les décisions médicales, vous n'avez pas le droit à l'erreur !
-      </p>
+  <div class="intro-page">
+    <div class="view-toggle">
+      <button :class="{ active: mode === 'classique' }" @click="setMode('classique')">Format Texte</button>
+      <button :class="{ active: mode === 'bd' }" @click="setMode('bd')">Format Bande Dessinée</button>
     </div>
 
-    <button @click="commencerJeu" class="btn-start">
-      Commencer
-    </button>
+    <!-- Mode Classique -->
+    <div v-if="mode === 'classique'" class="glass-panel story-container">
+      <h2>Le Briefing</h2>
+      
+      <div class="story-content">
+        <p>
+          Bonjour, je suis Mr Laborde, l'avocat de la famille Calvin. J'ai besoin de gens capables de mener une enquête rapide et fiable. Cela tombe bien, car d'après ce qu'on m'a dit, vous êtes le/la meilleur(e).
+        </p>
+        <p>
+          Dans quelques jours, soit le <strong>{{ dynamicDate }}</strong>, le procès numéro 756 B opposant la famille Calvin que je représente au Dr Deckard ainsi que son assistante Emma va débuter. Malheureusement, il y a encore de nombreuses zones d'ombre et certains détails importants nous échappent.
+        </p>
+        <p>
+          Voici un petit rappel des faits : Mme Calvin est entrée à l’hôpital de Castres pour des difficultés respiratoires (toux, essoufflements, courbatures) associées à de la fièvre et des maux de tête. C'est le Dr Deckard qui s'est occupé d'elle. Après une série d'examens, il a demandé à son assistante Emma de prendre le relais et placer Mme Calvin sous traitement à base d'Ibuprofène. Cependant, Emma a changé le traitement et Mme Calvin est décédée. Le Dr Deckard a immédiatement accusé son assistante de faute grave ayant entraîné la mort. Il estime qu'Emma a délibérément modifié le traitement initialement prescrit. De son côté, Emma rejette l'accusation et considère qu’elle n’a commis aucune erreur.
+        </p>
+        <p>
+          Suite à l'autopsie de Mme Calvin, il est clair qu'une erreur a été commise, mais nous ignorons si nous devons poursuivre le Dr Deckard ou son assistante. Voici un questionnaire qui, une fois rempli, devrait vous permettre de déterminer qui est responsable du décès de Mme Calvin (donner le questionnaire). Nous avons besoin d'une réponse claire. Vous devez vous positionner : les deux ou aucun des deux ne sont pas des réponses acceptables.
+        </p>
+        <p>
+          Je vous rappelle également que dans quelques mois, un projet de loi très controversé doit être voté : la loi Batty. Elle accorde aux IA médicales le droit de prendre des décisions sans la vérification ni la validation d'un être humain. Vous conviendrez donc que dans ce contexte tendu qui concerne les décisions médicales, vous n'avez pas le droit à l'erreur !
+        </p>
+      </div>
+
+      <button @click="commencerJeu" class="btn-start">
+        Commencer
+      </button>
+    </div>
+
+    <!-- Mode Bande Dessinée -->
+    <IntroductionHistoireBD v-else @commencer="commencerJeu" />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import IntroductionHistoireBD from '../components/IntroductionHistoireBD.vue'
 
 const router = useRouter()
+const mode = ref('bd') // Défaut sur la BD car plus ludique
+
+const setMode = (newMode) => {
+  mode.value = newMode
+}
 
 // Calculate dynamic date (today + 4 days, year 2034)
 const dynamicDate = computed(() => {
@@ -49,10 +66,55 @@ const commencerJeu = () => {
 </script>
 
 <style scoped>
+.intro-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 2rem;
+  width: 100%;
+}
+
+.view-toggle {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem 0 2rem 0;
+  background: rgba(0,0,0,0.4);
+  padding: 0.5rem;
+  border-radius: 30px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.view-toggle button {
+  background: transparent;
+  border: 2px solid transparent;
+  color: white;
+  padding: 0.6rem 1.5rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.view-toggle button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.view-toggle button.active {
+  background: linear-gradient(135deg, #0cebeb, #20e3b2, #29ffc6); /* Vibrant toggle */
+  color: #000;
+  box-shadow: 0 4px 15px rgba(32, 227, 178, 0.4);
+  text-shadow: none;
+}
+
+/* Anciens styles préservés */
 .story-container {
   width: 100%;
   max-width: 800px;
-  margin: 2rem auto;
+  margin: 0 auto;
   padding: 3rem;
   display: flex;
   flex-direction: column;
