@@ -1,4 +1,4 @@
-﻿export function notifyEnigmaCompleted(success = true, enigmaId = null, hintsUsed = null) {
+export function notifyEnigmaCompleted(success = true, enigmaId = null, hintsUsed = null) {
   const id = enigmaId || window.enigmaId || null
   const timeSeconds = getTimerSeconds()
 
@@ -28,7 +28,7 @@
 
   console.log('[Enigme] Résultat envoyé:', message)
 
-  // Limpiar el contador de pistas para la siguiente sala
+  // Réinitialiser le compteur d'indices pour la salle suivante
   localStorage.removeItem('currentEnigmaHints');
 }
 

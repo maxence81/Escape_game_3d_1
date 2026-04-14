@@ -69,7 +69,7 @@ public class AdminService {
         }
 
         // ==========================================================
-        // 4. Calcular el tiempo promedio por enigma para el gráfico de barras
+        // 4. Calculer le temps moyen par énigme pour le graphique en barres
         // ==========================================================
         if (!allAttempts.isEmpty()) {
             // Agrupamos los intentos por el nombre del enigma y promediamos el tiempo
@@ -82,7 +82,7 @@ public class AdminService {
                 ));
 
             // Convertimos el mapa a la lista DTO que espera Vue
-            // Añadiendo (0, 0) para errores y score ya que no se usan en el dashboard global
+            // Ajout (0, 0) pour les erreurs et les scores car ils ne sont pas utilisés dans le dashboard global
             List<EnigmaStatDTO> enigmaStatsList = enigmaAverageTimes.entrySet().stream()
                 .map(entry -> new EnigmaStatDTO(entry.getKey(), entry.getValue() / 60.0, 0, 0))
                 .collect(Collectors.toList());
@@ -206,15 +206,15 @@ public class AdminService {
             int precision = (int) Math.round(((double) resolvedUnique / totalAttempts) * 100);
             skills.put("PRECISION", precision);
 
-            // 🧩 LOGIQUE: Empieza en 100, pero se penaliza por cada pista utilizada (-10% por pista)
+            // 🧩 LOGIQUE: Commence à 100, mais est pénalisé pour chaque indice utilisé (-10% par indice)
             int logique = Math.max(20, 100 - (totalHints * 10));
             skills.put("LOGIQUE", logique);
 
-            // 🎨 CRÉATIVITÉ: Alta por defecto, pero baja si comete demasiados errores (fuerza bruta)
+            // 🎨 CRÉATIVITÉ: Élevée par défaut, mais diminue si le joueur commet trop d'erreurs (force brute)
             int creativite = Math.max(30, 100 - ((int)totalErrors * 5));
             skills.put("CREATIVITE", creativite);
 
-            // 🛡️ PERSÉVÉRANCE: 100% garantizado si termina el juego. Si no, sube a medida que intenta más cosas.
+            // 🛡️ PERSÉVÉRANCE: 100% garanti s'il termine le jeu. Sinon, augmente au fur et à mesure de ses tentatives.
             int perseverance = 50; 
             if (resolvedUnique >= 5) {
                 perseverance = 100;

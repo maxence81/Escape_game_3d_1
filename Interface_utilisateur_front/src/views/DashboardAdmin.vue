@@ -260,7 +260,7 @@ const recentPlayers = ref([])
 const enigmaStats = ref([]) 
 const maxEnigmaTime = ref(30) 
 
-// ✅ NUEVA VARIABLE: Guarda la lista completa para el reporte Excel
+// ✅ NOUVELLE VARIABLE: Enregistre la liste complète pour le rapport Excel
 const allPlayersExport = ref([])
 
 const hasData = computed(() => enigmaStats.value.length > 0)
@@ -268,7 +268,7 @@ const hasData = computed(() => enigmaStats.value.length > 0)
 const enigmaColors = ['#8b5cf6', '#9333ea', '#a855f7', '#c084fc', '#d8b4fe']
 const COLORS = ['#f472b6', '#c084fc', '#d946ef', '#a855f7', '#818cf8']
 
-// LÓGICA DEL TOOLTIP DINÁMICO
+// LOGIQUE DU TOOLTIP DYNAMIQUE
 const tooltip = ref({
   visible: false,
   text: '',
@@ -307,7 +307,7 @@ onMounted(async () => {
       adminService.getAllPlayers()
     ])
 
-    // ✅ Guardamos la lista cruda completa para el export CSV
+    // ✅ Nous conservons la liste brute complète pour l'export CSV
     allPlayersExport.value = playersData || []
 
     stats.value = {
@@ -350,9 +350,9 @@ const logout = () => {
   router.push('/')
 }
 
-// ✅ FUNCIÓN DE EXPORTACIÓN MEJORADA (MARKETING Y RESULTADOS)
+// ✅ FONCTION D'EXPORTATION AMÉLIORÉE (MARKETING ET RÉSULTATS)
 function exportCSV() {
-  // 1. Definimos los encabezados de las columnas (Indicadores FEEINS)
+  // 1. Définir les en-têtes de colonnes (Indicateurs FEEINS)
   const headers = [
     "ID Joueur",
     "Date d'Inscription (Accès)",
@@ -364,7 +364,7 @@ function exportCSV() {
     "Pseudo en jeu"
   ];
 
-  // 2. Extraemos y formateamos la información de cada jugador
+  // 2. Extraire et formater les informations de chaque joueur
   const rows = allPlayersExport.value.map(p => {
     return [
       p.id || '',
@@ -378,21 +378,21 @@ function exportCSV() {
     ];
   });
 
-  // 3. Unimos los encabezados y las filas
-  // Usamos JSON.stringify para rodear los textos con comillas y evitar que las comas rompan las columnas
+  // 3. Joindre les en-têtes et les lignes
+  // Utiliser JSON.stringify pour entourer les textes de guillemets et éviter que les virgules cassent les colonnes
   const csvContent = [
-    headers.join(';'), // Usamos punto y coma (;) porque Excel en Europa lo prefiere
+    headers.join(';'), // Utiliser des points-virgules (;) car Excel en Europe le préfère
     ...rows.map(r => r.map(field => `"${String(field).replace(/"/g, '""')}"`).join(';'))
   ].join('\n');
 
-  // 4. Creamos el archivo y forzamos la descarga (El \uFEFF asegura que Excel lea bien los acentos)
+  // 4. Créer le fichier et forcer le téléchargement (Le \uFEFF assure qu'Excel lise bien les accents)
   const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
   a.download = 'FEEINS_Rapport_Marketing_Joueurs.csv'
   
-  // Simulamos el click para descargar
+  // Simuler le clic pour télécharger
   document.body.appendChild(a);
   a.click()
   document.body.removeChild(a);
@@ -407,7 +407,7 @@ function getPercentage(count, total) {
 
 <style scoped>
 /* =========================================
-   TOOLTIP CUSTOM FLOTANTE
+   TOOLTIP CUSTOM FLOTTANT
    ========================================= */
 .custom-tooltip {
   position: fixed;
@@ -418,7 +418,7 @@ function getPercentage(count, total) {
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
-  pointer-events: none; /* Para que el ratón no intercepte la caja */
+  pointer-events: none; /* Pour que la souris n'intercepte pas la boîte */
   z-index: 9999;
   transform: translate(-50%, -100%);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
@@ -427,7 +427,7 @@ function getPercentage(count, total) {
   letter-spacing: 0.02em;
 }
 
-/* Clases interactivas para el hover */
+/* Classes interactives pour le survol */
 .bar-interactive:hover, .demo-track:hover {
   cursor: pointer;
   filter: brightness(1.2);
@@ -480,7 +480,7 @@ function getPercentage(count, total) {
 .chart-container { flex: 1; display: flex; position: relative; min-height: 200px; }
 
 /* =========================================
-   DEMOGRAPHICS (BARRAS HORIZONTALES)
+   DEMOGRAPHICS (BARRES HORIZONTALES)
    ========================================= */
 .demographics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; margin-bottom: 1.2rem; }
 .demo-bars { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.5rem; }
@@ -493,7 +493,7 @@ function getPercentage(count, total) {
 .bg-purple { background: linear-gradient(90deg, #9333ea, #c084fc); }
 
 /* =========================================
-   BAR CHARTS (VERTICALES) CORREGIDAS (Con track)
+   BAR CHARTS (VERTICALES) CORRIGÉES (Avec track)
    ========================================= */
 .y-axis { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 0.8rem; color: rgba(255,255,255,0.4); font-size: 0.65rem; border-right: 1px dashed rgba(255,255,255,0.1); padding-bottom: 34px; }
 .bar-area { flex: 1; display: flex; justify-content: space-around; align-items: flex-end; padding-left: 0.8rem; position: relative; height: 100%; }
@@ -529,7 +529,7 @@ function getPercentage(count, total) {
 .btn-mini-inspect { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-family: inherit; cursor: pointer; transition: background 0.2s; }
 .btn-mini-inspect:hover { background: rgba(255,255,255,0.15); }
 
-/* Utilidades Loader */
+/* Utilitaires Loader */
 .loading-row { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 4rem 0; color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; }
 .spinner { width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #a855f7; border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }

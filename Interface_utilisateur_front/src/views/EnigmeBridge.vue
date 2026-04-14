@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="enigma-wrapper" :class="{ 'enigma-solved': showSuccessModal }">
     <!-- Header avec retour et timer -->
     <header class="enigma-header">
@@ -138,20 +138,20 @@ const finalScore = computed(() => {
   return Math.max(0, Math.floor(1000 * ((600 - elapsedSeconds.value) / 600)))
 })
 
-// ✅ MODIFICADO: Extraer también hintsUsed del mensaje
+// ✅ MODIFIÉ: Extraire également hintsUsed du message
 function handleMessage(event) {
   const { type, enigmaId, success, timeSeconds, hintsUsed } = event.data || {}
 
   if (type === 'ENIGMA_COMPLETED') {
     const id = enigmaId || props.enigmaId
     const time = timeSeconds || elapsedSeconds.value
-    // Pasar las pistas, o 0 si no vienen
+    // Passer les indices, ou 0 s'ils ne sont pas fournis
     const hints = hintsUsed || 0 
     handleEnigmaCompletion(id, success !== false, time, hints)
   }
 }
 
-// ✅ MODIFICADO: Recibir hintsUsed y pasarlo al backend
+// ✅ MODIFIÉ: Recevoir hintsUsed et le passer au backend
 async function handleEnigmaCompletion(enigmaId, isSuccess, timeSeconds, hintsUsed) {
     if (isSuccess) {
       clearInterval(timerInterval)
@@ -164,8 +164,8 @@ async function handleEnigmaCompletion(enigmaId, isSuccess, timeSeconds, hintsUse
       await gameService.validatePuzzle(
           enigmaId, 
           isSuccess ? 'SUCCESS' : 'FAIL',
-          timeSeconds, // Segundos reales
-          hintsUsed    // Pistas reales
+          timeSeconds, // Secondes réelles
+          hintsUsed    // Indices réels
       )
     } catch (e) {
       console.warn('Impossible de valider le puzzle côté backend:', e)
@@ -184,7 +184,7 @@ async function handleEnigmaCompletion(enigmaId, isSuccess, timeSeconds, hintsUse
 async function markCompleted() {
   clearInterval(timerInterval)
   try {
-    // Para el modo desarrollador, ponemos 0 pistas
+    // Pour le mode développeur, nous mettons 0 indice
     await gameService.validatePuzzle(props.enigmaId, 'SUCCESS', elapsedSeconds.value, 0)
     await gameService.endGame()
   } catch (e) {

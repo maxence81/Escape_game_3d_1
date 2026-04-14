@@ -162,7 +162,7 @@ const stats = ref(null)
 const loading = ref(true)
 const totalLevels = ref(5)
 
-// ✅ LÓGICA DEL TOOLTIP DINÁMICO
+// ✅ LOGIQUE DU TOOLTIP DYNAMIQUE
 const tooltip = ref({ visible: false, text: '', x: 0, y: 0 })
 const showTooltip = (event, text) => { tooltip.value = { visible: true, text: text, x: event.clientX, y: event.clientY - 40 } }
 const moveTooltip = (event) => { if (tooltip.value.visible) { tooltip.value.x = event.clientX; tooltip.value.y = event.clientY - 40 } }
@@ -193,7 +193,7 @@ onMounted(async () => {
   }
 })
 
-// CÁLCULOS DINÁMICOS
+// CALCULS DYNAMIQUES
 const globalScore = computed(() => {
   const list = computedEnigmasList.value;
   const enigmasJoues = list.filter(enigma => enigma.status === 'RÉUSSI');
@@ -202,14 +202,14 @@ const globalScore = computed(() => {
   return Math.round(totalScores / enigmasJoues.length); 
 })
 
-// Eje Y Dinámico para barras
+// Axe Y Dynamique pour les barres
 const maxEnigmaTime = computed(() => {
   if (!stats.value?.enigmaTimes || stats.value.enigmaTimes.length === 0) return 20;
   const max = Math.max(...stats.value.enigmaTimes.map(e => e.avgTime));
   return max > 0 ? Math.ceil(max / 5) * 5 : 20; 
 })
 
-// Lógica de Radar
+// Logique de Radar
 const CENTER = { x: 50, y: 50 }
 const MAX_R = 38
 const ANGLES_DEG = [-90, -18, 54, 126, 198]
@@ -258,7 +258,7 @@ const computedEnigmasList = computed(() => {
 
 <style scoped>
 /* =========================================
-   TOOLTIP CUSTOM FLOTANTE
+   TOOLTIP CUSTOM FLOTTANT
    ========================================= */
 .custom-tooltip {
   position: fixed;
@@ -324,7 +324,7 @@ const computedEnigmasList = computed(() => {
 .chart-container { flex: 1; display: flex; position: relative; min-height: 200px; }
 
 /* =========================================
-   BAR CHARTS (VERTICALES) CORREGIDAS
+   BAR CHARTS (VERTICALES) CORRIGÉES
    ========================================= */
 .y-axis { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 0.8rem; color: rgba(255,255,255,0.4); font-size: 0.65rem; border-right: 1px dashed rgba(255,255,255,0.1); padding-bottom: 34px; }
 .bar-area { flex: 1; display: flex; justify-content: space-around; align-items: flex-end; padding-left: 0.8rem; position: relative; height: 100%; }
@@ -358,7 +358,7 @@ const computedEnigmasList = computed(() => {
 .enigme-stats div span:first-child { font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em; }
 .val { font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.9); }
 
-/* Loaders y vacíos */
+/* Loaders et états vides */
 .loading-row { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 4rem 0; color: rgba(255,255,255,0.5); font-size: 0.85rem; }
 .spinner { width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #a855f7; border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }

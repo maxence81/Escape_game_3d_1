@@ -53,7 +53,7 @@ public class AdminController {
         }
     }
 
-    // 4. Alias con /players/{id}/stats para compatibilidad con el frontend
+    // 4. Alias avec /players/{id}/stats pour la compatibilité avec le frontend
     @GetMapping("/players/{id}/stats")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlayerDetailDTO> getPlayerStatsAlias(@PathVariable Long id) {

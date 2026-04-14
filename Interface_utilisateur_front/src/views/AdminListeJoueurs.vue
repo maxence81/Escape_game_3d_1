@@ -160,7 +160,7 @@ onMounted(async () => {
       // ✅ Guardamos el profil en lugar del etablissement
       profil: p.profil || '—',
       dateInscription: formatDate(p.dateInscription),
-      // ✅ Guardamos la fecha RAW de inscripción para poder ordenarla matemáticamente
+      // ✅ Nous conservons la date RAW d'inscription pour pouvoir la trier mathématiquement
       dateInscriptionRaw: p.dateInscription,
       color: COLORS[i % COLORS.length]
     }))

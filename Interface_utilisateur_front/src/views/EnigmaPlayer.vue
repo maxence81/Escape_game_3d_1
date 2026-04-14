@@ -1,6 +1,6 @@
 <template>
   <div class="enigma-wrapper">
-    <!-- Header con timer -->
+    <!-- Header avec timer -->
     <header class="enigma-header">
       <button @click="abandonner" class="btn-back">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -23,7 +23,7 @@
       <div class="enigma-title">{{ enigmaName }}</div>
     </header>
 
-    <!-- iframe del juego -->
+    <!-- iframe du jeu -->
     <div class="iframe-container" v-if="!solved && !loading">
       <iframe
         ref="gameFrame"
@@ -33,13 +33,13 @@
       ></iframe>
     </div>
 
-    <!-- Pantalla de carga -->
+    <!-- Écran de chargement -->
     <div class="loading-screen" v-if="loading">
       <div class="spinner"></div>
       <p>Chargement de l'énigme...</p>
     </div>
 
-    <!-- Pantalla de éxito -->
+    <!-- Écran de succès -->
     <div class="success-screen" v-if="solved">
       <div class="success-content">
         <div class="success-icon">
@@ -98,13 +98,13 @@ function stopTimer() {
   clearInterval(timerInterval)
 }
 
-// ---- Map enigmaId → URL del juego HTML ----
-// Ajusta estos paths según tus archivos reales
+// ---- Map enigmaId → URL du jeu HTML ----
+// Ajustez ces chemins selon vos fichiers réels
 const ENIGMA_URLS = {
   '1': '/Cabinet Deckard/Enigme Cabinet Deckard.html',
   '2': '/combo-lock/index.html',
   '3': '/ftp-interface/index.html',
-  // Añade aquí los demás enigmas
+  // Ajoutez ici les autres énigmes
 }
 
 const ENIGMA_NAMES = {
@@ -113,24 +113,24 @@ const ENIGMA_NAMES = {
   '3': 'Interface FTP',
 }
 
-// ---- Inicialización ----
+// ---- Initialisation ----
 onMounted(async () => {
   enigmaUrl.value = ENIGMA_URLS[enigmaId] || '/'
   enigmaName.value = ENIGMA_NAMES[enigmaId] || `Énigme ${enigmaId}`
 
-  // 1. Iniciar la sesión en el backend
+  // 1. Démarrer la session dans le backend
   try {
     const session = await gameService.startGame()
     sessionId.value = session.sessionId
   } catch (err) {
-    // Si ya hay una sesión activa, continuar igual
+    // S'il y a déjà une session active, continuer quand même
     console.warn('Session déjà active ou erreur:', err.message)
   }
 
   loading.value = false
   startTimer()
 
-  // 2. Escuchar el evento ENIGMA_SOLVED que el juego HTML envía via postMessage
+  // 2. Écouter l'événement ENIGMA_SOLVED que le jeu HTML envoie via postMessage
   window.addEventListener('message', onGameMessage)
 })
 
@@ -139,9 +139,9 @@ onUnmounted(() => {
   window.removeEventListener('message', onGameMessage)
 })
 
-// ---- Receptor del mensaje del juego ----
+// ---- Récepteur du message du jeu ----
 async function onGameMessage(event) {
-  // Aceptar mensajes de cualquier origen (nuestro iframe local)
+  // Accepter les messages de toute origine (notre iframe local)
   const data = event.data
 
   if (!data || data.type !== 'ENIGMA_SOLVED') return
@@ -152,21 +152,21 @@ async function onGameMessage(event) {
   const tempsEnSecondes = secondes.value
 
   try {
-    // 3. Validar la respuesta en el backend
+    // 3. Valider la réponse dans le backend
     const result = await gameService.validatePuzzle(enigmaId, answer)
 
     if (result.success) {
       finalScore.value = calcularScore(tempsEnSecondes)
       solved.value = true
 
-      // 4. Cerrar la sesión y grabar el tiempo
+      // 4. Fermer la session et enregistrer le temps
       await gameService.endGame()
     } else {
-      // Respuesta incorrecta — el juego no debería enviar ENIGMA_SOLVED
-      // si la respuesta es mala, pero por seguridad:
+      // Réponse incorrecte — le jeu ne devrait pas envoyer ENIGMA_SOLVED
+      // si la réponse est mauvaise, mais par sécurité:
       errorMsg.value = 'Réponse incorrecte transmise.'
       setTimeout(() => { errorMsg.value = '' }, 3000)
-      startTimer() // reanudar timer
+      startTimer() // reprendre le timer
     }
   } catch (err) {
     console.error('Erreur validation:', err)
@@ -175,7 +175,7 @@ async function onGameMessage(event) {
   }
 }
 
-// Score basado en tiempo (más rápido = más puntos)
+// Score basé sur le temps (plus rapide = plus de points)
 function calcularScore(segs) {
   if (segs < 300) return 100
   if (segs < 600) return 80
