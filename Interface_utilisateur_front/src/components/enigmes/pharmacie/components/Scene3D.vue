@@ -45,7 +45,6 @@ function isInteractiveName(name) {
   const n = name.toLowerCase()
   return (
     n === 'cube064_1' ||
-    n === 'plane010' ||
     n.startsWith('box_of_medicine') ||
     n === 'bureau002'
   )
@@ -159,6 +158,15 @@ function onClick() {
   const all = raycaster.intersectObjects(scene.children, true)
   if (all.length) {
     console.log('Objet cliqué dans la pharmacie : ', all[0].object.name)
+    // Vérifier si l'objet cliqué directement (le plus proche) est Plane010
+    if (all[0].object.name.toLowerCase() === 'plane010') {
+      if (discoveredClues.includes('bear')) {
+        showBearInfo.value = true
+      } else {
+        showMiniGame.value = true
+      }
+      return
+    }
   }
 
   const hits = raycaster.intersectObjects(interactiveObjects, false)
@@ -169,12 +177,6 @@ function onClick() {
   if (name === 'cube064_1') {
     isComputerUIOpen.value = true
     discoverClue('computer')
-  } else if (name === 'plane010') {
-    if (discoveredClues.includes('bear')) {
-      showBearInfo.value = true
-    } else {
-      showMiniGame.value = true
-    }
   } else if (name.startsWith('box_of_medicine')) {
     currentMedicineName.value = hits[0].object.name
     showMedicineInfo.value = true
