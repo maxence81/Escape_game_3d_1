@@ -45,7 +45,7 @@ function isInteractiveName(name) {
   const n = name.toLowerCase()
   return (
     n === 'cube064_1' ||
-    n.startsWith('bear_doll') ||
+    n.startsWith('plane010') ||
     n.startsWith('box_of_medicine') ||
     n === 'bureau002'
   )
@@ -157,7 +157,9 @@ function onClick() {
   raycaster.setFromCamera(pointer, camera)
 
   const all = raycaster.intersectObjects(scene.children, true)
-  if (all.length) {}
+  if (all.length) {
+    console.log('Objet cliqué dans la pharmacie : ', all[0].object.name)
+  }
 
   const hits = raycaster.intersectObjects(interactiveObjects, false)
   if (!hits.length) return
@@ -167,7 +169,7 @@ function onClick() {
   if (name === 'cube064_1') {
     isComputerUIOpen.value = true
     discoverClue('computer')
-  } else if (name.startsWith('bear_doll')) {
+  } else if (name.startsWith('plane010')) {
     if (discoveredClues.includes('bear')) {
       showBearInfo.value = true
     } else {
