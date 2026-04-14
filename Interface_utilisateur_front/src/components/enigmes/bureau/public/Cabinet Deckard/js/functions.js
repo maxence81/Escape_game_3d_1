@@ -1,10 +1,10 @@
-﻿function send() {
+function send() {
 
     // recupération des valeurs
     var val = document.getElementById("password").value;
 
-    // en majuscules
-    var result = val.toUpperCase();
+    // en majuscules et on enlève les espaces
+    var result = val.toUpperCase().replace(/\s+/g, '');
 
 
     if (result == "") {
