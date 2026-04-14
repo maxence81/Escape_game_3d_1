@@ -29,10 +29,28 @@ function finishIntro() {
   showIntro.value = false
 }
 
+function resetGameState() {
+  showIntro.value = true
+  showComputer.value = false
+  showCodeBox.value = false
+  showPlaquette.value = false
+  showPathHint.value = false
+  currentPlaqueIndex.value = 0
+  discoveredComputer.value = false
+  discoveredBox.value = false
+  for (let i = 0; i < unlockedPlaques.length; i++) {
+    unlockedPlaques[i] = false
+  }
+  boxUnlocked.value = false
+  computerCompleted.value = false
+  gamePassed.value = false
+}
+
 export function useGameState() {
   return {
     showIntro,
     finishIntro,
+    resetGameState,
     showComputer,
     showCodeBox,
     showPlaquette,

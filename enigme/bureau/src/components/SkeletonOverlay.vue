@@ -59,8 +59,8 @@ const completed = ref(false)
 const finalTime = ref('')
 
 function validateAnswers() {
-  const a1 = answer1.value.toLowerCase().trim()
-  const a2 = answer2.value.toLowerCase().trim()
+  const a1 = answer1.value.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const a2 = answer2.value.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   let correct1 = false, correct2 = false
 
   if (a1.includes('grippe')) {

@@ -9,7 +9,7 @@
     
     <div class="intro-text">
       <p>
-        Pour soigner efficacement, les systèmes de santé doivent se parler et se comprendre parfaitement.
+        Dans la pharmacie, vous avez exploité des documents médicaux et utilisé un terminal pour retracer la chaîne de prescription, comprendre les équivalences médicamenteuses et identifier une erreur médicale.
       </p>
     </div>
 
@@ -23,8 +23,8 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>Bases de Données (SQL)</h3>
-          <p>C'est la bibliothèque géante où sont rangées toutes les infos (maladies, médicaments, dosages).</p>
+          <h3>Bases de Données (Relationnelles)</h3>
+          <p>Le registre utilisé est un exemple concret de BDD : un code pathologie pointe vers une alternative de traitement, elle-même liée à un code de médicament aboutissant à nom précis (sa DCI).</p>
         </div>
       </div>
 
@@ -40,8 +40,8 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>L'Interopérabilité</h3>
-          <p>C'est la capacité de deux logiciels différents à échanger des données sans erreur en utilisant des codes communs.</p>
+          <h3>Nomenclatures Médicales</h3>
+          <p>L'utilisation de codes normalisés (comme la CIM-10 : J10 pour la grippe) garantit que tous les systèmes d'un hôpital parlent le même langage diagnostique sans erreur d'interprétation.</p>
         </div>
       </div>
 
@@ -54,8 +54,8 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>Rétroconception</h3>
-          <p>En remontant le fil des tables de données, vous avez retrouvé le chemin logique qu'un ordinateur suit pour valider un traitement.</p>
+          <h3>L'Interopérabilité</h3>
+          <p>Croiser le dossier d'autopsie avec la base médicamenteuse démontre l'importance de l'interopérabilité : si deux logiciels ne croisent pas parfaitement ces données, l'humain court un risque vital.</p>
         </div>
       </div>
     </div>

@@ -9,7 +9,8 @@
     
     <div class="intro-text">
       <p>
-        Ici, vous avez manipulé le cerveau virtuel d'une IA pour comprendre comment elle prend ses décisions.
+        Vous avez manipulé le "cerveau virtuel" d'une IA de diagnostic clinique. 
+        En ajustant manuellement les poids (W1 à W10) d'un algorithme neuronal, vous avez vu de l'intérieur comment la machine rend un avis médical.
       </p>
     </div>
 
@@ -26,7 +27,7 @@
         </div>
         <div class="concept-content">
           <h3>Réseaux de Neurones</h3>
-          <p>Ce sont des modèles informatiques inspirés de notre cerveau pour apprendre à reconnaître des schémas complexes.</p>
+          <p>Pour débloquer l'ordinateur de la chambre, il fallait comprendre l'équation du modèle LSTM pour équilibrer parfaitement les paramètres d'évaluation du patient.</p>
         </div>
       </div>
 
@@ -37,8 +38,8 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>Prédiction Temporelle</h3>
-          <p>L'IA analyse les données du passé (comme des tests allergiques sur plusieurs mois) pour prédire ce qu'il va se passer demain.</p>
+          <h3>Diagnostic IA : Le Modèle Predictif</h3>
+          <p>L'IA quantifie un diagnostic qualitatif (comme une crise d'allergie) en calculant un score de gravité précis, un processus utile pour anticiper des réactions à court terme.</p>
         </div>
       </div>
 
@@ -51,8 +52,8 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>Le Danger des Données Manquantes</h3>
-          <p>Si une information manque dans l'historique, l'IA peut faire une erreur de prédiction, d'où l'importance de la vérification humaine.</p>
+          <h3>L'Effet "Boîte Noire"</h3>
+          <p>Faire confiance à un diagnostic d'IA sans le comprendre est critique, l'intervention dans le mini-jeu a prouvé l'obligation de justifier techniquement chaque prédiction.</p>
         </div>
       </div>
     </div>

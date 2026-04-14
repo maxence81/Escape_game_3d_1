@@ -9,12 +9,15 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { gameState, finishIntro } from './composables/useGameState.js'
+import { ref, watch, onMounted } from 'vue'
+import { gameState, finishIntro, resetGameState } from './composables/useGameState.js'
 import IntroScreen from './components/IntroScreen.vue'
 import Scene3D from './components/Scene3D.vue'
 import GameUI from './components/GameUI.vue'
 
+onMounted(() => {
+  resetGameState()
+})
 
 const finalTime = ref('00:00')
 const finalScore = ref(0)

@@ -25,7 +25,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['onWifiConnected', 'onMonitorClick', 'onSafeClick'])
+const emit = defineEmits(['onWifiConnected', 'onMonitorClick', 'onSafeClick', 'onRouterClick'])
 
 const container = ref(null)
 

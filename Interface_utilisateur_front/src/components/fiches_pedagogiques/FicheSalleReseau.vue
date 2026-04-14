@@ -9,8 +9,7 @@
     
     <div class="intro-text">
       <p>
-        Le numérique n'est pas "magique", il repose sur des infrastructures physiques bien réelles. 
-        Dans cette salle, vous avez découvert comment l'information circule.
+        Dans cette salle, vous avez dû rétablir physiquement une connexion réseau pour accéder au serveur local, puis vous avez découvert une faille inquiétante : le code d'accès d'un coffre contenant un rapport médical confidentiel était stocké en texte clair !
       </p>
     </div>
 
@@ -25,33 +24,33 @@
           </svg>
         </div>
         <div class="concept-content">
-          <h3>Le Signal Invisible</h3>
-          <p>Pour qu'un appareil communique, il doit se connecter à un point d'accès (comme une borne Wi-Fi).</p>
-        </div>
-      </div>
-
-      <div class="concept-card">
-        <div class="icon-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-        </div>
-        <div class="concept-content">
-          <h3>L'Identité Numérique</h3>
-          <p>Chaque réseau possède un nom (le SSID) qui permet de l'identifier et, parfois, de transmettre des informations clés.</p>
+          <h3>Réseaux Locaux (LAN)</h3>
+          <p>Le routeur que vous avez branché permet aux machines de communiquer ensemble (comme le Serveur_Admin), un élément crucial de l'infrastructure d'un hôpital.</p>
         </div>
       </div>
 
       <div class="concept-card">
         <div class="icon-wrapper">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
         </div>
         <div class="concept-content">
-          <h3>La Sécurité Physique</h3>
-          <p>En cybersécurité, celui qui a accès au matériel (brancher un boîtier) a souvent le pouvoir sur le logiciel.</p>
+          <h3>Vulnérabilités de Stockage</h3>
+          <p>Trouver un code PIN dans un simple fichier (Code_Securite_Urgence.txt) expose l'absurdité de sécuriser un coffre physique si sa clé est numériquement accessible.</p>
+        </div>
+      </div>
+
+      <div class="concept-card">
+        <div class="icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div class="concept-content">
+          <h3>Confidentialité Médicale</h3>
+          <p>En récupérant le rapport d'autopsie de S. Calvin dans le coffre, vous avez constaté que ce manque de sécurité compromet directement le secret médical.</p>
         </div>
       </div>
     </div>
@@ -65,7 +64,7 @@
         </svg>
         <h4>Le savais-tu ?</h4>
       </div>
-      <p>La santé est un domaine "intime" qui nécessite une rigueur éthique totale : chaque connexion doit être sécurisée pour protéger la vie privée des patients.</p>
+      <p>En France, la certification HDS (Hébergeur de Données de Santé) est imposée à toute organisation qui héberge des dossiers médicaux, pour éviter ce type de partage réseau non sécurisé.</p>
     </div>
 
     <!-- Le bouton 'Continuer' émet un événement que le binôme pourra écouter -->

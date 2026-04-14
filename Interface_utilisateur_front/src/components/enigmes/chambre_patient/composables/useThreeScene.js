@@ -21,17 +21,17 @@ function resolveInteraction(mesh) {
 	while (obj) {
 		const name = (obj.name || '').toLowerCase()
 
-		if (name === 'keyboard') return { type: 'computer', plaqueIndex: null }
-		if (name === 'monitor_monitor_0') return { type: 'box', plaqueIndex: null }
-		if (name === 'obj3d66-395056-1-561_1') return { type: 'pathHint', plaqueIndex: null }
+		if (name === 'keyboard' || name === 'laptop') return { type: 'computer', plaqueIndex: null, root: obj }
+		if (name === 'monitor_monitor_0') return { type: 'box', plaqueIndex: null, root: obj }
+		if (name === 'obj3d66-395056-1-561_1') return { type: 'pathHint', plaqueIndex: null, root: obj }
 
 		if (Object.prototype.hasOwnProperty.call(PLAQUE_NAME_TO_INDEX, name)) {
-			return { type: 'plaque', plaqueIndex: PLAQUE_NAME_TO_INDEX[name] }
+			return { type: 'plaque', plaqueIndex: PLAQUE_NAME_TO_INDEX[name], root: obj }
 		}
 
 		obj = obj.parent
 	}
-	return { type: null, plaqueIndex: null }
+	return { type: null, plaqueIndex: null, root: null }
 }
 
 export function useThreeScene(containerRef) {
@@ -42,6 +42,8 @@ export function useThreeScene(containerRef) {
 	let raycaster, pointer
 	let animationId
 	let roomBounds = null
+	let hoveredObject = null
+	const hoveredMaterials = new Map()
 
 	const moveSpeed = 0.08
 	const verticalSpeed = 0.06
@@ -93,7 +95,7 @@ export function useThreeScene(containerRef) {
 		controls.update()
 
 		raycaster = new THREE.Raycaster()
-		pointer = new THREE.Vector2()
+		pointer = new THREE.Vector2(-2, -2)
 
 		scene.add(new THREE.AmbientLight(0xffffff, 0.6))
 		const dirLight = new THREE.DirectionalLight(0xffffff, 1.2)
@@ -310,6 +312,54 @@ export function useThreeScene(containerRef) {
 	function animate() {
 		animationId = requestAnimationFrame(animate)
 		updateMovement()
+
+		// Effet de survol (clignotement)
+		raycaster.setFromCamera(pointer, camera)
+		const hits = raycaster.intersectObjects(scene.children, true)
+		const interaction = hits.length ? resolveInteraction(hits[0].object) : { type: null, root: null }
+		const targetHover = interaction.root
+
+		if (hoveredObject !== targetHover) {
+			if (hoveredObject) {
+				hoveredObject.traverse((child) => {
+					if (child.isMesh && hoveredMaterials.has(child.uuid)) {
+						if (child.material && child.material !== hoveredMaterials.get(child.uuid)) {
+							child.material.dispose()
+						}
+						// On remet l'ancien material
+						child.material = hoveredMaterials.get(child.uuid)
+					}
+				})
+				hoveredMaterials.clear()
+			}
+
+			hoveredObject = targetHover
+
+			if (hoveredObject) {
+				hoveredObject.traverse((child) => {
+					if (child.isMesh && child.material) {
+						hoveredMaterials.set(child.uuid, child.material)
+						child.material = child.material.clone()
+					}
+				})
+			}
+		}
+
+		if (hoveredObject) {
+			const time = performance.now() * 0.005
+			const intensity = (Math.sin(time) + 1) / 2 * 0.4
+			hoveredObject.traverse((child) => {
+				if (child.isMesh && child.material) {
+					const origMat = hoveredMaterials.get(child.uuid)
+					if (child.material.emissive && origMat && origMat.emissive) {
+						child.material.emissive.copy(origMat.emissive).lerp(new THREE.Color(0xffff00), intensity)
+					} else if (child.material.color && origMat && origMat.color) {
+						child.material.color.copy(origMat.color).lerp(new THREE.Color(0xffff00), intensity)
+					}
+				}
+			})
+		}
+
 		controls.update()
 		renderer.render(scene, camera)
 	}

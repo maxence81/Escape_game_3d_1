@@ -1,4 +1,4 @@
-﻿import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
@@ -20,8 +20,31 @@ export function useThreeScene(canvasRef, emit) {
   let serverObject = null
   let dogObject = null
   const raycaster = new THREE.Raycaster()
-  const mouse = new THREE.Vector2()
+  const mouse = new THREE.Vector2(-2, -2)
   let animationId = null
+  let hoveredObject = null
+  const hoveredMaterials = new Map()
+
+  function getInteractiveRoot(clickedObject) {
+    let current = clickedObject
+    while (current) {
+      const name = current.name.toLowerCase()
+      if (name.includes('computer') || name.includes('ordinateur') || name.includes('pc') ||
+        name.includes('ecran') || name.includes('screen') || name.includes('monitor')) return current
+      if (name.includes('server') || name.includes('serveur') || name.includes('rack') || name === 'cube011' || name === 'cube010') return current
+      if (name.includes('tablelight2')) return current
+      if (name.includes('torus') || name.includes('sphere003')) return current
+      if (name === 'plane003_2') return current
+      if (name === 'béziercurve002_2') return current
+      if (name === 'sphere') return current
+      if (name.includes('wooden') && name.includes('chest')) return current
+      if (name === 'skeleton003') return current
+      current = current.parent
+    }
+    if (computerObject && (clickedObject === computerObject || clickedObject.parent === computerObject)) return computerObject
+    if (serverObject && (clickedObject === serverObject || clickedObject.parent === serverObject)) return serverObject
+    return null
+  }
 
   // Keys state
   const keys = {
@@ -74,6 +97,7 @@ export function useThreeScene(canvasRef, emit) {
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('keyup', onKeyUp)
     canvas.addEventListener('click', onMouseClick)
+    canvas.addEventListener('mousemove', onMouseMove)
 
     // Render loop
     render()
@@ -306,7 +330,7 @@ console.log('Model loaded and added to scene.', gltf.scene)
       let isServer = false
       while (serverCurrent) {
         const sname = serverCurrent.name.toLowerCase()
-        if (sname.includes('server') || sname.includes('serveur') || sname.includes('rack')) {
+        if (sname.includes('server') || sname.includes('serveur') || sname.includes('rack') || sname === 'cube011' || sname === 'cube010') {
           isServer = true
           break
         }
@@ -337,12 +361,18 @@ console.log('Model loaded and added to scene.', gltf.scene)
 
   function onKeyUp(event) {
     switch (event.code) {
-      case 'z': case 'w':  case 'arrowup': keys.forward = false; break
-      case 's': case 'arrowdown': keys.backward = false; break
-      case 'q': case 'a':  case 'arrowleft': keys.left = false; break
-      case 'd': case 'arrowright': keys.right = false; break
-      case ' ': keys.up = false; break
+      case 'KeyW': case 'KeyZ': case 'ArrowUp': keys.forward = false; break
+      case 'KeyS': case 'ArrowDown': keys.backward = false; break
+      case 'KeyA': case 'KeyQ': case 'ArrowLeft': keys.left = false; break
+      case 'KeyD': case 'ArrowRight': keys.right = false; break
+      case 'Space': keys.up = false; break
     }
+  }
+
+  function onMouseMove(event) {
+    const rect = renderer.domElement.getBoundingClientRect()
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
   }
 
   function onResize() {
@@ -378,6 +408,61 @@ console.log('Model loaded and added to scene.', gltf.scene)
       controls.target.y += moveSpeed
     }
 
+    raycaster.setFromCamera(mouse, camera)
+    const intersects = raycaster.intersectObjects(scene.children, true)
+    
+    let targetHover = null
+    if (intersects.length > 0) {
+      targetHover = getInteractiveRoot(intersects[0].object)
+    }
+
+    if (hoveredObject !== targetHover) {
+      if (hoveredObject) {
+        hoveredObject.traverse((child) => {
+          if (child.isMesh && hoveredMaterials.has(child.uuid)) {
+            if (child.material && child.material !== hoveredMaterials.get(child.uuid)) {
+               child.material.dispose()
+            }
+            child.material = hoveredMaterials.get(child.uuid)
+          }
+        })
+        hoveredMaterials.clear()
+      }
+
+      hoveredObject = targetHover
+
+      if (hoveredObject) {
+        hoveredObject.traverse((child) => {
+          if (child.isMesh && child.material) {
+            hoveredMaterials.set(child.uuid, child.material)
+            child.material = child.material.clone()
+          }
+        })
+      }
+    }
+
+    if (hoveredObject) {
+      const time = performance.now() * 0.005
+      const intensity = (Math.sin(time) + 1) / 2 * 0.4
+      hoveredObject.traverse((child) => {
+        if (child.isMesh && child.material) {
+          const origMat = hoveredMaterials.get(child.uuid)
+          if (child.material.emissive && origMat && origMat.emissive) {
+            child.material.emissive.copy(origMat.emissive).lerp(new THREE.Color(0xffff00), intensity)
+          } else if (child.material.color && origMat && origMat.color) {
+            child.material.color.copy(origMat.color).lerp(new THREE.Color(0xffff00), intensity)
+          }
+        }
+      })
+      if (renderer.domElement.style.cursor !== 'pointer') {
+         renderer.domElement.style.cursor = 'pointer'
+      }
+    } else {
+      if (renderer.domElement.style.cursor !== 'default') {
+         renderer.domElement.style.cursor = 'default'
+      }
+    }
+
     controls.update()
     renderer.render(scene, camera)
     animationId = window.requestAnimationFrame(render)
@@ -389,7 +474,11 @@ console.log('Model loaded and added to scene.', gltf.scene)
     window.removeEventListener('keydown', onKeyDown)
     window.removeEventListener('keyup', onKeyUp)
     const canvas = canvasRef.value
-    if (canvas) canvas.removeEventListener('click', onMouseClick)
+    if (canvas) {
+      canvas.removeEventListener('click', onMouseClick)
+      canvas.removeEventListener('mousemove', onMouseMove)
+      canvas.style.cursor = 'default'
+    }
     if (renderer) renderer.dispose()
   }
 

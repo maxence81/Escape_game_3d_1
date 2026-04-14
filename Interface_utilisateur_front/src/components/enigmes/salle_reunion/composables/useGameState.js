@@ -65,10 +65,21 @@ export function makeChoice(answer) {
   }
 }
 
+export function resetGameState() {
+  gameState.showIntro = true;
+  gameState.isStarted = true;
+  gameState.showChoiceOverlay = false;
+  gameState.discoveredBouton = false;
+  gameState.gamePassed = false;
+  gameState.gameOver = false;
+  gameState.choiceMessage = '';
+}
+
 export function useGameState() {
   return {
     gameState,
     finishIntro,
+    resetGameState,
     startGame,
     openChoice,
     closeChoice,

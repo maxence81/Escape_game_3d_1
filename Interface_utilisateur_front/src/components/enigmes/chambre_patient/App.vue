@@ -9,15 +9,16 @@ import PlaquetteOverlay from './components/PlaquetteOverlay.vue'
 import PathHintOverlay from './components/PathHintOverlay.vue'
 import DocumentInventory from './components/DocumentInventory.vue'
 import { useGameState } from './composables/useGameState.js'
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 
-const { 
+const {
   showComputer, 
-  showCodeBox, 
-  showPlaquette, 
-  showPathHint, 
-  showIntro, 
-  finishIntro, 
+  showCodeBox,
+  showPlaquette,
+  showPathHint,
+  showIntro,
+  finishIntro,
+  resetGameState,
   gamePassed,
   discoveredComputer,
   discoveredBox,
@@ -33,6 +34,10 @@ const inventoryDocs = computed(() => [
   { id: 'computer', label: 'Nœud de Diagnostic', sub: 'Terminal', icon: 'computer', discovered: discoveredComputer.value },
   { id: 'box', label: 'Stockage Sécurisé', sub: 'Boîte', icon: 'lock', discovered: discoveredBox.value }
 ])
+
+onMounted(() => {
+  resetGameState()
+})
 
 function openDocFromInventory(id) {
   if (id.startsWith('plaque')) {

@@ -71,7 +71,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="player in filteredPlayers" :key="player.id">
+            <tr v-for="player in paginatedPlayers" :key="player.id">
               <td>
                 <div class="player-cell">
                   <div class="avatar" :style="{ backgroundColor: player.color }">
@@ -106,12 +106,28 @@
           </tbody>
         </table>
       </div>
+
+      <div v-if="totalPages > 1" class="pagination-controls">
+        <button class="btn-page" :disabled="currentPage === 1" @click="prevPage">&laquo; Précédent</button>
+        <div class="page-numbers">
+          <button 
+            v-for="p in totalPages" 
+            :key="p" 
+            class="btn-page" 
+            :class="{ active: p === currentPage }" 
+            @click="goToPage(p)"
+          >
+            {{ p }}
+          </button>
+        </div>
+        <button class="btn-page" :disabled="currentPage === totalPages" @click="nextPage">Suivant &raquo;</button>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { adminService, authService } from '../services/api'
 
@@ -120,6 +136,13 @@ const loading = ref(true)
 const allPlayers = ref([])
 const searchQuery = ref('')
 const sortKey = ref('nom')
+
+const currentPage = ref(1)
+const ITEMS_PER_PAGE = 8
+
+watch([searchQuery, sortKey], () => {
+  currentPage.value = 1
+})
 
 const COLORS = ['#f472b6', '#c084fc', '#d946ef', '#a855f7', '#818cf8', '#38bdf8', '#34d399']
 
@@ -211,6 +234,28 @@ const filteredPlayers = computed(() => {
 
   return list
 })
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredPlayers.value.length / ITEMS_PER_PAGE) || 1
+})
+
+const paginatedPlayers = computed(() => {
+  const start = (currentPage.value - 1) * ITEMS_PER_PAGE
+  const end = start + ITEMS_PER_PAGE
+  return filteredPlayers.value.slice(start, end)
+})
+
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+function goToPage(p) {
+  currentPage.value = p
+}
 </script>
 
 <style scoped>
@@ -321,7 +366,7 @@ const filteredPlayers = computed(() => {
   font-size: 0.9rem;
 }
 
-.table-container { overflow: hidden; }
+.table-container { overflow-x: auto; }
 .players-table { width: 100%; border-collapse: collapse; text-align: left; }
 .players-table th {
   padding: 1.25rem 1.5rem;
@@ -370,4 +415,39 @@ const filteredPlayers = computed(() => {
   white-space: nowrap;
 }
 .btn-inspect:hover { background: rgba(255,255,255,0.2); }
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.page-numbers {
+  display: flex;
+  gap: 0.5rem;
+}
+.btn-page {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+.btn-page:hover:not(:disabled) {
+  background: rgba(255,255,255,0.25);
+}
+.btn-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-page.active {
+  background: #a855f7;
+  border-color: #a855f7;
+  font-weight: bold;
+}
 </style>
