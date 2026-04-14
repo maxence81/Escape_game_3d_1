@@ -23,7 +23,7 @@ public class JwtUtils {
 
     // 1. GENERAR TOKEN (Al hacer Login)
     public String generateJwtToken(Authentication authentication) {
-        // Obtenemos el usuario principal de Spring Security
+        // Obtenir l'utilisateur principal de Spring Security
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
 
         return Jwts.builder()
@@ -34,7 +34,7 @@ public class JwtUtils {
                 .compact();
     }
 
-    // Método auxiliar para decodificar la clave secreta Base64
+    // Méthode auxiliaire pour décoder la clé secrète Base64
     private Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }

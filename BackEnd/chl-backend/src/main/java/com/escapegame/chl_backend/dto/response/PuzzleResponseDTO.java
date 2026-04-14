@@ -2,7 +2,7 @@ package com.escapegame.chl_backend.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor; // <-- Asegúrate de importar esto
+import lombok.NoArgsConstructor; // <--- Assurez-vous d'importer ceci
 
 @Data
 @AllArgsConstructor

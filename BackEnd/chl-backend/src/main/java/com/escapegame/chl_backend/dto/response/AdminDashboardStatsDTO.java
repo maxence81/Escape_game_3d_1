@@ -11,10 +11,10 @@ public class AdminDashboardStatsDTO {
     private double averageTimeMinutes;
     private double successRate; // Porcentaje 0.0 a 1.0 (o 0 a 100)
     
-    // ✅ NUEVO: Lista para alimentar el gráfico de barras en Vue
+    // ✅ NOUVEAU: Liste pour alimenter le graphique en barres dans Vue
     private List<EnigmaStatDTO> enigmaStats; 
     
-    // Opcional: Si quieres enviar datos para gráficos extra
+    // Optionnel: Si vous souhaitez envoyer des données pour des graphiques supplémentaires
     private Map<String, Integer> ageDistribution; 
 
     private Map<String, Long> repartitionProfil;

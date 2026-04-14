@@ -95,7 +95,7 @@ public class GameService {
         // ✅ CAMBIO CRÍTICO: El tiempo exacto del intento ahora viene del frontend
         attempt.setTempsPasseSec(request.getTimeSpentSeconds());
         
-        // ✅ NUEVO: Registramos cuántas pistas utilizó para este intento
+        // ✅ NOUVEAU: Nous enregistrons combien d'indices ont été utilisés pour cette tentative
         attempt.setIndicesUtilises(request.getHintsUsed());
         
         attemptRepository.save(attempt);

@@ -29,7 +29,7 @@ public class PuzzleAttempt {
     private Integer scoreFinal;
     private Boolean estReussi;
 
-    // ✅ NUEVO: Campo para guardar las pistas utilizadas
+    // ✅ NOUVEAU: Champ pour enregistrer les indices utilisés
     @Column(name = "indices_utilises", nullable = false)
     private int indicesUtilises = 0;
 

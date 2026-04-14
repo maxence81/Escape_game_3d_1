@@ -195,7 +195,7 @@ const globalScore = computed(() => {
   return Math.round(totalScores / enigmasJoues.length); 
 })
 
-// Eje Y Dinámico para barras
+// Axe Y Dynamique pour les barres
 const maxEnigmaTime = computed(() => {
   if (!player.value?.enigmaTimes || player.value.enigmaTimes.length === 0) return 20;
   const max = Math.max(...player.value.enigmaTimes.map(e => e.avgTime));
